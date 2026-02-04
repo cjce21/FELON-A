@@ -161,7 +161,7 @@
 
     <div id="system-notification-container"></div>
 
-    <!-- INTRO SEQUENCE -->
+    <!-- INTRO SEQUENCE (RESTAURADA COMPLETA) -->
     <div id="intro-screen" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center p-8 font-mono text-green-500">
         <div class="max-w-xl w-full space-y-4">
             <div id="terminal-output" class="text-sm md:text-base leading-relaxed opacity-90 min-h-[200px]"></div>
@@ -295,7 +295,14 @@
             setTimeout(() => { notification.classList.add('notification-exit'); notification.addEventListener('animationend', () => notification.remove()); }, 4000);
         }
 
-        window.onload = () => { initSession(); checkAbandonment(); runIntroSequence(); lucide.createIcons(); };
+        window.onload = () => { 
+            initSession(); 
+            checkAbandonment(); 
+            runIntroSequence(); 
+            lucide.createIcons();
+            // Actualizar la interfaz en vivo cada minuto para que los contadores bajen solos
+            setInterval(renderGrid, 60000);
+        };
 
         function initSession() {
             userId = localStorage.getItem('maria_user_id') || ('FEL-' + Math.random().toString(36).substr(2, 9).toUpperCase());
@@ -378,11 +385,16 @@
                 let locked = lvl.id !== 1, timeText = "BLOQUEADO";
 
                 if (activeLockouts[lvl.id] > now) {
-                    locked = true; timeText = `BLOQUEO: ${Math.ceil((activeLockouts[lvl.id] - now)/60000)}m`;
+                    locked = true; 
+                    const diff = activeLockouts[lvl.id] - now;
+                    timeText = `BLOQUEO: ${Math.ceil(diff/60000)}m`;
                 } else if (lvl.id !== 1 && completedLevels.includes(1)) { 
                     const unlock = genesisTimestamp + ((lvl.id - 1) * 86400000);
                     if (now >= unlock) locked = false;
-                    else { const d = unlock - now; timeText = `${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`; }
+                    else { 
+                        const d = unlock - now; 
+                        timeText = `${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`; 
+                    }
                 } else if (lvl.id === 1) locked = false;
 
                 const btn = document.createElement('button');
