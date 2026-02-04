@@ -50,115 +50,205 @@
             user-select: none; 
             -webkit-user-select: none;
             overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .level-card {
+            width: 280px;
+            height: 280px;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 10;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .level-card:hover {
+            z-index: 50;
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(34, 197, 94, 0.15);
         }
 
         .modal-content-area {
-            height: 420px;
+            height: 440px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
         }
+
+        #system-notification-container {
+            position: fixed;
+            top: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1500;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .system-notification {
+            background-color: rgba(12, 10, 9, 0.95);
+            border: 1px solid #166534;
+            color: #ecfccb;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            animation: slideDownIn 0.4s ease-out forwards;
+            pointer-events: auto;
+            width: 90%;
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        @keyframes slideDownIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .notification-exit {
+            animation: slideUpOut 0.4s ease-in forwards;
+        }
+
+        @keyframes slideUpOut {
+            from { transform: translateY(0); opacity: 1; }
+            to { transform: translateY(-20px); opacity: 0; }
+        }
+
+        /* Dial / Slider Personalizado */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 12px;
+            cursor: pointer;
+            background: #1c1917;
+            border-radius: 6px;
+            border: 1px solid #166534;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            height: 30px;
+            width: 30px;
+            border-radius: 50%;
+            background: #22c55e;
+            cursor: pointer;
+            -webkit-appearance: none;
+            margin-top: -10px;
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+        }
+
+        #story-screen { z-index: 500; }
+        #main-layout { display: flex; flex-direction: column; height: 100%; width: 100%; }
+
+        /* Lights Out */
+        .light-btn { transition: all 0.3s ease; }
+        .light-on { background-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+        .light-off { background-color: #1c1917; border: 1px solid #292524; }
     </style>
 </head>
-<body class="font-sans flex flex-col items-center min-h-screen selection:bg-green-700/30" 
-      oncontextmenu="return false" 
-      ondragstart="return false">
+<body class="font-sans selection:bg-green-700/30" oncontextmenu="return false" ondragstart="return false">
 
-    <!-- INTRO SEQUENCE (Cover) -->
-    <div id="intro-screen" class="fixed inset-0 z-[200] bg-black flex flex-col items-center justify-center p-8 font-mono text-green-500">
+    <div id="system-notification-container"></div>
+
+    <!-- INTRO SEQUENCE -->
+    <div id="intro-screen" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center p-8 font-mono text-green-500">
         <div class="max-w-xl w-full space-y-4">
             <div id="terminal-output" class="text-sm md:text-base leading-relaxed opacity-90 min-h-[200px]"></div>
             <div id="loading-container" class="hidden mt-8 w-full">
-                <div class="text-xs mb-1 text-green-400 font-bold uppercase tracking-widest">Iniciando Sistema...</div>
+                <div class="text-xs mb-2 text-green-400 font-bold uppercase tracking-widest text-center">Iniciando Sistema...</div>
                 <div class="w-full bg-stone-900 h-2 border border-green-900/50 rounded-full overflow-hidden">
                     <div id="intro-progress-bar" class="bg-green-600 h-full w-0 shadow-[0_0_15px_rgba(22,163,74,0.4)]"></div>
                 </div>
-                <div id="intro-percentage" class="text-right text-xs text-green-600 mt-1 font-mono">0%</div>
+                <div id="intro-percentage" class="text-right text-xs text-green-600 mt-2 font-mono">0%</div>
             </div>
         </div>
     </div>
 
-    <!-- Background con efectos Musgo -->
-    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <!-- Background Layer -->
+    <div id="bg-effects" class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
         <div class="absolute inset-0 bg-[radial-gradient(circle_at_center,_#1c1917_0%,_#0c0a09_100%)]"></div>
-        <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-900/10 blur-[120px] rounded-full animate-pulse-soft"></div>
-        <div class="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-900/10 blur-[120px] rounded-full animate-pulse-soft" style="animation-delay: 1s;"></div>
+        <div class="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-green-900/10 blur-[150px] rounded-full animate-pulse-soft"></div>
+        <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-emerald-900/10 blur-[150px] rounded-full animate-pulse-soft" style="animation-delay: 1s;"></div>
     </div>
 
     <!-- PANTALLA DE HISTORIA -->
-    <div id="story-screen" class="hidden fixed inset-0 z-[100] bg-stone-950/98 backdrop-blur-xl p-6 md:p-12 flex flex-col items-center justify-start font-serif text-center overflow-y-auto scrollbar-none">
-        <div class="max-w-3xl w-full relative z-10 pt-10">
-            <button onclick="closeStory()" class="absolute top-0 right-0 text-stone-500 hover:text-green-400 transition-colors">
-                <i data-lucide="x" class="w-8 h-8"></i>
+    <div id="story-screen" class="hidden fixed inset-0 bg-stone-950 p-6 md:p-12 flex flex-col items-center justify-start font-serif text-center overflow-y-auto scrollbar-none">
+        <div class="max-w-5xl w-full relative z-10 pt-10 px-4">
+            <button onclick="closeStory()" class="absolute top-0 right-0 text-stone-500 hover:text-green-400 transition-colors z-[600] p-4">
+                <i data-lucide="x" class="w-12 h-12"></i>
             </button>
-            <h1 class="text-2xl md:text-3xl text-green-100 uppercase tracking-[0.2em] font-light border-b border-green-900/50 pb-6 mb-8">
-                Archivo: Nuestra Historia
-            </h1>
-            <div id="story-content" class="space-y-8 text-lg text-stone-300 leading-relaxed text-left min-h-[200px] font-mono"></div>
-            <div class="mt-20 pt-8 border-t border-green-900/30 text-left font-mono opacity-30 hover:opacity-100 transition-opacity">
-                <p class="text-[10px] text-green-700 uppercase mb-2 font-bold tracking-tighter">Sync: Didac-Click Cloud // Persistencia de datos</p>
-                <div class="flex flex-col md:flex-row gap-4 items-start md:items-center">
-                    <div class="text-[10px] bg-stone-900 p-3 rounded border border-green-900/20 flex-1 w-full overflow-hidden text-ellipsis">
-                        SESSION_ID: <span id="display-user-id" class="text-green-500 select-all font-bold">CARGANDO...</span>
-                    </div>
-                    <button onclick="restoreSessionPrompt()" class="text-[10px] px-4 py-2 bg-green-900/10 border border-green-700/30 text-green-400 hover:bg-green-900/30 rounded transition-all whitespace-nowrap uppercase font-bold tracking-widest">Restaurar Avance</button>
-                </div>
+            <h1 class="text-3xl md:text-5xl text-green-100 uppercase tracking-[0.3em] font-light border-b border-green-900/50 pb-8 mb-12">Archivo: Nuestra Historia</h1>
+            <div id="story-content" class="space-y-12 text-xl md:text-2xl text-stone-300 leading-relaxed text-left min-h-[300px] font-mono"></div>
+            <div class="mt-24 pt-12 border-t border-green-900/30 text-left font-mono opacity-60">
+                <p class="text-xs text-green-700 uppercase mb-3 font-bold tracking-widest">ID_SESIÓN: <span id="display-user-id" class="text-green-500 select-all font-bold tracking-widest uppercase">Cargando ID...</span></p>
+                <button onclick="restoreSessionPrompt()" class="text-xs px-6 py-3 bg-green-900/10 border border-green-700/30 text-green-400 hover:bg-green-900/30 rounded transition-all uppercase font-bold tracking-widest">Restaurar Avance</button>
             </div>
         </div>
     </div>
 
-    <!-- HEADER -->
-    <header id="main-header" class="w-full max-w-5xl px-6 py-6 flex justify-between items-center z-10 sticky top-0 opacity-0 transition-opacity duration-1000">
-        <button onclick="showStory()" class="flex items-center gap-4 group cursor-pointer hover:opacity-80 transition-opacity text-left">
-            <div class="p-2 bg-green-900/10 rounded-lg group-hover:bg-green-900/20 border border-green-900/20 transition-all shadow-[0_0_10px_rgba(22,163,74,0.1)]">
-                <i data-lucide="fingerprint" class="text-green-600 w-6 h-6"></i>
-            </div>
-            <div>
-                <h1 class="text-xl font-light tracking-[0.3em] text-green-100 uppercase">Proyecto Felonía</h1>
-                <p class="text-[9px] text-stone-500 uppercase tracking-[0.2em] group-hover:text-green-400 transition-colors font-bold">Núcleo: Activo</p>
-            </div>
-        </button>
-        <div id="lockout-alert" class="hidden flex items-center gap-3 px-4 py-2 bg-stone-900 border border-green-900/50 rounded-lg text-stone-400 text-xs shadow-[0_0_15px_rgba(20,83,45,0.2)] animate-pulse">
-            <i data-lucide="alert-octagon" class="w-3 h-3 text-green-500"></i>
-            <span class="font-mono font-bold uppercase tracking-tighter">Abandono Detectado: Bloqueo Temporal Activo</span>
-        </div>
-    </header>
-
-    <!-- GRID DE NIVELES -->
-    <div id="level-grid" class="flex-1 w-full max-w-5xl p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 z-10 overflow-y-auto scrollbar-none pb-20 opacity-0 transition-opacity duration-1000 delay-300"></div>
-
-    <!-- MODAL PRINCIPAL -->
-    <div id="modal-overlay" class="hidden fixed inset-0 z-50 bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-4">
-        <div class="w-full max-w-3xl bg-stone-900/95 border border-green-800/30 rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col md:flex-row h-[520px] zoom-in relative overflow-hidden">
-            <div class="w-full md:w-1/3 bg-stone-950 p-8 border-b md:border-b-0 md:border-r border-green-900/20 flex flex-col justify-between relative">
-                <div class="absolute top-0 left-0 w-full h-1 bg-stone-900">
-                    <div id="time-bar" class="h-full bg-gradient-to-r from-green-800 to-green-600 transition-all duration-1000 ease-linear shadow-[0_0_10px_rgba(22,163,74,0.3)]"></div>
+    <div id="main-layout" class="relative z-10">
+        <header id="main-header" class="w-full pl-6 pr-10 py-8 flex justify-between items-center z-[100] opacity-0 transition-opacity duration-1000">
+            <button onclick="showStory()" class="flex items-center gap-6 group cursor-pointer hover:opacity-80 transition-opacity text-left">
+                <div class="p-3 bg-green-900/10 rounded-xl group-hover:bg-green-900/20 border border-green-900/20 transition-all shadow-[0_0_20px_rgba(22,163,74,0.15)]">
+                    <i data-lucide="fingerprint" class="text-green-600 w-10 h-10"></i>
                 </div>
                 <div>
-                    <div class="text-[10px] text-green-600 font-mono mb-3 flex items-center gap-2 tracking-widest uppercase font-bold">
-                        <i data-lucide="activity" class="w-3 h-3 animate-pulse"></i>
+                    <h1 class="text-3xl font-light tracking-[0.4em] text-green-100 uppercase leading-none">Proyecto Felonía</h1>
+                    <p class="text-[10px] text-stone-500 uppercase tracking-[0.3em] group-hover:text-green-400 transition-colors font-bold mt-2">Núcleo Operativo: Activo</p>
+                </div>
+            </button>
+            <div id="lockout-alert" class="hidden flex items-center gap-4 px-6 py-3 bg-stone-900 border border-green-900/50 rounded-xl text-stone-400 text-sm shadow-[0_0_20px_rgba(20,83,45,0.3)] animate-pulse">
+                <i data-lucide="alert-octagon" class="w-5 h-5 text-green-500"></i>
+                <span class="font-mono font-bold uppercase tracking-widest hidden sm:inline">Abandono Detectado</span>
+            </div>
+        </header>
+
+        <main id="main-content" class="flex-1 w-full px-6 py-6 overflow-y-auto scrollbar-none opacity-0 transition-opacity duration-1000">
+            <div id="level-grid" class="w-full flex flex-wrap justify-center gap-8 md:gap-12"></div>
+        </main>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal-overlay" class="hidden fixed inset-0 z-[800] bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-6">
+        <div class="w-full max-w-5xl bg-stone-900/95 border border-green-800/30 rounded-3xl shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row min-h-[600px] zoom-in relative overflow-hidden">
+            <div class="w-full md:w-1/3 bg-stone-950 p-10 border-b md:border-b-0 md:border-r border-green-900/20 flex flex-col justify-between relative">
+                <div class="absolute top-0 left-0 w-full h-1.5 bg-stone-900">
+                    <div id="time-bar" class="h-full bg-gradient-to-r from-green-800 to-green-600 transition-all duration-1000 ease-linear"></div>
+                </div>
+                <div>
+                    <div class="text-xs text-green-600 font-mono mb-4 flex items-center gap-3 tracking-[0.2em] uppercase font-bold">
+                        <i data-lucide="activity" class="w-4 h-4 animate-pulse"></i>
                         <span id="timer-label">Analizando...</span>
                     </div>
-                    <div id="timer-display" class="text-5xl font-extralight text-white font-mono tracking-tight">--:--</div>
+                    <div id="timer-display" class="text-7xl font-extralight text-white font-mono tracking-tighter">--:--</div>
                 </div>
-                <div class="space-y-4">
-                    <h2 id="modal-title" class="text-xl text-green-100 uppercase tracking-wide font-light">Bloqueado</h2>
-                    <p id="modal-desc" class="text-xs text-stone-400 leading-relaxed font-light text-justify"></p>
+                <div class="space-y-6">
+                    <h2 id="modal-title" class="text-2xl text-green-100 uppercase tracking-widest font-light">Bloqueado</h2>
+                    <p id="modal-desc" class="text-sm text-stone-400 leading-relaxed font-light text-justify border-l border-green-900/30 pl-4"></p>
                 </div>
-                <div class="text-[9px] text-stone-600 font-mono mt-auto uppercase tracking-tighter" id="modal-id-display">ID: 01 // SEC_HEX</div>
+                <div class="text-xs text-stone-600 font-mono mt-auto uppercase tracking-widest opacity-50" id="modal-id-display">ID: 01 // SEC_HEX</div>
             </div>
-            <div class="w-full md:w-2/3 p-8 flex items-center justify-center bg-stone-900/30 relative overflow-hidden">
-                <div id="modal-content" class="w-full modal-content-area space-y-4"></div>
+            
+            <div class="w-full md:w-2/3 p-10 flex items-center justify-center bg-stone-900/30 relative overflow-hidden">
+                <div id="modal-content" class="w-full modal-content-area space-y-8"></div>
             </div>
         </div>
     </div>
 
     <script>
-        // --- URL DE GOOGLE APPS SCRIPT ---
         const GAS_URL = "https://script.google.com/macros/s/AKfycbwBIRpuQp9cXRi9G3ALJhj2gbVQOy1Rs5Ioxyl7-ef4AA-VpLMECetlcKnl6BXt6ZrOIg/exec"; 
 
-        // --- DATOS DE NIVELES (LIMPIOS) ---
         const RELATIONSHIP_DATA = [
             { 
                 id: 1, 
@@ -171,7 +261,17 @@
                 timeLimit: 999999, 
                 icon: "car-front" 
             },
-            { id: 2, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
+            { 
+                id: 2, 
+                title: "Pacto de Sangre", 
+                storyFragment: `Después de aquella esquina, el trabajo se convirtió en un campo de minas emocional. Siete días de resistencia absoluta. Trabajábamos hombro con hombro, intercambiando besos furtivos en la cocina fría de nuestro local mientras el mundo seguía girando. Los trayectos en tu vehículo, las miradas profundas que lo decían todo y esos abrazos que intentaban contener lo incontenible.<br><br>Planificamos el escape hacia aquel Airbnb con la precisión de quien sabe que está a punto de detonar. El 28 de marzo llegó y, tras salir del colegio, pusimos rumbo a nuestro destino. Un contratiempo biológico —tu periodo— apareció en escena, pero la espera había sido demasiado larga como para retroceder. Tras discutirlo, la decisión fue unánime: continuar.<br><br>La atmósfera se cargó tras la ducha. Los besos iniciales dieron paso a una entrega total que comenzó con la intimidad de tus labios recorriéndome, escalando hasta que te tomé en brazos y te hice mía. La emoción me desbordó repetidas veces, pero el deseo nos mantuvo habitando diferentes rincones de la casa, una y otra vez, hasta que el tiempo nos obligó a separarnos. Aquella noche, las coordenadas de nuestra historia quedaron grabadas para siempre.`, 
+                question: "¿Cuántos días transcurrieron desde la tensión de la esquina hasta la consumación final?", 
+                answer: "7", 
+                type: "dial", 
+                game: "lights_out", 
+                timeLimit: 1260, 
+                icon: "droplet" 
+            },
             { id: 3, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 4, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 5, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
@@ -185,42 +285,24 @@
         let userId = "", completedLevels = [], genesisTimestamp = null, activeLockouts = {}, tttAttempts = 0;
         let activeLevelData = null, timeLeft = 0, graceTime = 0, isGracePeriod = false, timerInterval = null, modalStage = "game", gameInternalState = {};
 
-        // --- PROTECCIÓN ANTI-TRAMPAS ---
-        document.addEventListener('keydown', function(e) {
-            if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 67))) {
-                e.preventDefault();
-                return false;
-            }
-        });
+        function showSystemMessage(message, type = 'info') {
+            const container = document.getElementById('system-notification-container');
+            const notification = document.createElement('div');
+            notification.className = 'system-notification';
+            let icon = type === 'error' ? 'alert-octagon' : (type === 'success' ? 'check-circle' : 'info');
+            notification.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5 ${type === 'error' ? 'text-red-500' : (type === 'success' ? 'text-green-400' : 'text-blue-400')}"></i><div class="flex-1 text-sm leading-snug font-mono">${message}</div>`;
+            container.appendChild(notification); lucide.createIcons();
+            setTimeout(() => { notification.classList.add('notification-exit'); notification.addEventListener('animationend', () => notification.remove()); }, 4000);
+        }
 
-        window.onload = async () => {
-            await initSession();
-            checkAbandonment();
-            runIntroSequence();
-            renderGrid();
-            setInterval(renderGrid, 60000); 
-            lucide.createIcons();
-        };
+        window.onload = () => { initSession(); checkAbandonment(); runIntroSequence(); lucide.createIcons(); };
 
-        async function initSession() {
+        function initSession() {
             userId = localStorage.getItem('maria_user_id') || ('FEL-' + Math.random().toString(36).substr(2, 9).toUpperCase());
             localStorage.setItem('maria_user_id', userId);
-            document.getElementById('display-user-id').innerText = userId;
-            loadProgressLocal();
-            if (GAS_URL) {
-                try {
-                    const resp = await fetch(`${GAS_URL}?userId=${userId}`);
-                    const cloud = await resp.json();
-                    if (cloud.status !== "not_found") {
-                        if (cloud.completedLevels.length >= completedLevels.length) {
-                            completedLevels = cloud.completedLevels;
-                            genesisTimestamp = cloud.genesisTimestamp;
-                            tttAttempts = cloud.tttAttempts;
-                            saveToLocal();
-                        }
-                    }
-                } catch (e) { console.warn("Cloud Sync Offline"); }
-            }
+            const displayId = document.getElementById('display-user-id');
+            if(displayId) displayId.innerText = userId;
+            loadProgressLocal(); renderGrid();
         }
 
         function loadProgressLocal() {
@@ -231,64 +313,45 @@
             if (genesis) genesisTimestamp = parseInt(genesis);
         }
 
-        function saveToLocal() {
+        function saveToLocal(shouldSync = true) {
             localStorage.setItem('maria_completed', JSON.stringify(completedLevels));
             localStorage.setItem('maria_ttt_attempts', tttAttempts.toString());
             if (genesisTimestamp) localStorage.setItem('maria_genesis_time', genesisTimestamp.toString());
-            syncCloud();
-        }
-
-        async function syncCloud() {
-            if (!GAS_URL) return;
-            const payload = { userId, completedLevels, genesisTimestamp, tttAttempts };
-            try { fetch(GAS_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) }); } catch (e) {}
         }
 
         function restoreSessionPrompt() {
             const old = prompt("INGRESE ID_SESIÓN PARA RESTAURAR:");
-            if (old && old.startsWith('FEL-')) {
-                localStorage.setItem('maria_user_id', old.trim());
-                location.reload();
-            }
+            if (old && old.startsWith('FEL-')) { localStorage.setItem('maria_user_id', old.trim()); location.reload(); }
         }
 
-        // --- INTRO ---
         async function runIntroSequence() {
-            const out = document.getElementById('terminal-output');
-            const loader = document.getElementById('loading-container');
+            const out = document.getElementById('terminal-output'), loader = document.getElementById('loading-container');
             const lines = ["ENLACE: DIDAC-CLICK GROUP SECURE SERVER", "ESTABLECIENDO CONEXIÓN SEGURA...", "ACCEDIENDO AL NÚCLEO DE MEMORIA...", "INICIANDO PROTOCOLO: PROYECTO FELONÍA v1.0", "ESTADO: ESPERANDO USUARIO."];
-            
             if (completedLevels.length > 0) { skipIntro(); return; }
-            
             for (let line of lines) {
-                const p = document.createElement('div');
-                p.className = "mb-4 text-green-500 font-mono"; p.innerHTML = "> "; out.appendChild(p);
+                const p = document.createElement('div'); p.className = "mb-4 text-green-500 font-mono text-lg"; p.innerHTML = "> "; out.appendChild(p);
                 for (let i = 0; i < line.length; i++) {
                     p.innerHTML = "> " + line.substring(0, i+1) + "<span class='cursor-blink'></span>";
                     await new Promise(r => setTimeout(r, 45));
                 }
                 p.innerHTML = "> " + line; await new Promise(r => setTimeout(r, 400));
             }
-            
             loader.classList.remove('hidden');
             const bar = document.getElementById('intro-progress-bar'), pct = document.getElementById('intro-percentage');
-            for (let i = 0; i <= 100; i++) {
-                bar.style.width = i + "%"; pct.innerText = i + "%";
-                await new Promise(r => setTimeout(r, 110)); 
-            }
+            for (let i = 0; i <= 100; i++) { bar.style.width = i + "%"; pct.innerText = i + "%"; await new Promise(r => setTimeout(r, 110)); }
             endIntro();
         }
 
         function skipIntro() {
-            document.getElementById('intro-screen').classList.add('hidden');
+            const intro = document.getElementById('intro-screen'); if(intro) intro.classList.add('hidden');
             document.getElementById('main-header').classList.replace('opacity-0', 'opacity-100');
-            document.getElementById('level-grid').classList.replace('opacity-0', 'opacity-100');
+            document.getElementById('main-content').classList.replace('opacity-0', 'opacity-100');
         }
 
         function endIntro() {
-            const scr = document.getElementById('intro-screen');
-            scr.style.transition = "opacity 1.5s"; scr.style.opacity = "0";
-            setTimeout(() => { scr.classList.add('hidden'); skipIntro(); }, 1500);
+            const scr = document.getElementById('intro-screen'); if(!scr) return;
+            scr.style.transition = "opacity 1s"; scr.style.opacity = "0";
+            setTimeout(() => { scr.classList.add('hidden'); skipIntro(); }, 1000);
         }
 
         function checkAbandonment() {
@@ -296,7 +359,6 @@
             if (act && !completedLevels.includes(parseInt(act)) && parseInt(act) !== 1) {
                 applyLockout(parseInt(act));
                 document.getElementById('lockout-alert').classList.remove('hidden');
-                setTimeout(() => alert("ABANDONO DETECTADO: BLOQUEO TEMPORAL ACTIVO."), 500);
             }
             localStorage.removeItem('session_active_level');
         }
@@ -309,43 +371,27 @@
         }
 
         function renderGrid() {
-            const grid = document.getElementById('level-grid'); grid.innerHTML = '';
-            const now = new Date().getTime();
-            
+            const grid = document.getElementById('level-grid'); if(!grid) return;
+            grid.innerHTML = ''; const now = new Date().getTime();
             RELATIONSHIP_DATA.forEach(lvl => {
                 const done = completedLevels.includes(lvl.id);
                 let locked = lvl.id !== 1, timeText = "BLOQUEADO";
-                
+
                 if (activeLockouts[lvl.id] > now) {
                     locked = true; timeText = `BLOQUEO: ${Math.ceil((activeLockouts[lvl.id] - now)/60000)}m`;
-                } else if (lvl.id !== 1 && completedLevels.includes(1)) {
+                } else if (lvl.id !== 1 && completedLevels.includes(1)) { 
                     const unlock = genesisTimestamp + ((lvl.id - 1) * 86400000);
                     if (now >= unlock) locked = false;
-                    else {
-                        const d = unlock - now;
-                        timeText = `${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`;
-                    }
+                    else { const d = unlock - now; timeText = `${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`; }
                 } else if (lvl.id === 1) locked = false;
 
                 const btn = document.createElement('button');
                 const displayTitle = locked ? "SECTOR ENCRIPTADO" : lvl.title;
                 const displayIcon = locked ? "lock" : lvl.icon;
 
-                btn.className = `relative aspect-square rounded-2xl p-6 flex flex-col justify-between text-left group transition-all duration-500 overflow-hidden ${locked ? 'bg-stone-900/30 border border-stone-800 opacity-50 cursor-not-allowed' : (done ? 'bg-green-900/10 border border-green-800/30' : 'bg-gradient-to-br from-stone-900 to-stone-950 border border-green-700/50 shadow-lg scale-100 hover:scale-[1.02]')}`;
-                
-                if (!locked) btn.onclick = () => done ? alert("Registro recuperado de la memoria.") : openLevel(lvl);
-                
-                btn.innerHTML = `<div class="flex justify-between items-start z-10">
-                    <span class="text-[10px] font-mono ${locked ? 'text-stone-600' : 'text-green-500'} font-bold">0${lvl.id}</span>
-                    <i data-lucide="${done ? 'star' : (locked ? 'lock' : 'unlock')}" class="w-4 h-4 ${done ? 'text-green-500 fill-green-500' : (locked ? 'text-stone-700' : 'text-green-500 animate-pulse')}"></i>
-                </div>
-                <div class="absolute inset-0 flex items-center justify-center opacity-10 group-hover:opacity-20 transition-opacity pointer-events-none">
-                    <i data-lucide="${displayIcon}" width="${lvl.id === 1 && !locked ? '80' : '64'}"></i>
-                </div>
-                <div class="z-10 mt-4">
-                    <h3 class="text-sm font-light ${done ? 'text-green-700/50 line-through decoration-green-800/30' : 'text-green-100'}">${displayTitle}</h3>
-                    <span class="text-[9px] uppercase tracking-widest text-green-600 font-bold">${locked ? timeText : (done ? 'Recuperado' : 'Sector Abierto')}</span>
-                </div>`;
+                btn.className = `level-card rounded-[3rem] p-10 flex flex-col justify-between text-left group overflow-hidden ${locked ? 'bg-stone-900/30 border border-stone-800 opacity-50 cursor-not-allowed' : (done ? 'bg-green-900/10 border border-green-800/30' : 'bg-gradient-to-br from-stone-900 to-stone-950 border border-green-700/50 cursor-pointer')}`;
+                if (!locked) btn.onclick = () => done ? showSystemMessage("REGISTRO YA RECUPERADO.", "info") : openLevel(lvl);
+                btn.innerHTML = `<div class="flex justify-between items-start z-10"><span class="text-base font-mono ${locked ? 'text-stone-600' : 'text-green-500'} font-bold uppercase tracking-[0.2em]">0${lvl.id}</span><i data-lucide="${done ? 'star' : (locked ? 'lock' : 'unlock')}" class="w-7 h-7 ${done ? 'text-green-500 fill-green-500' : (locked ? 'text-stone-700' : 'text-green-500 animate-pulse')}"></i></div><div class="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none"><i data-lucide="${displayIcon}" width="120"></i></div><div class="z-10 mt-6"><h3 class="text-2xl font-light tracking-wide ${done ? 'text-green-700/50 line-through' : 'text-green-100'}">${displayTitle}</h3><span class="text-[10px] uppercase tracking-[0.3em] text-green-600 font-bold mt-4 block">${locked ? timeText : (done ? 'Fragmento Recuperado' : 'Acceso Autorizado')}</span></div>`;
                 grid.appendChild(btn);
             });
             lucide.createIcons();
@@ -353,50 +399,26 @@
 
         function openLevel(data) {
             localStorage.setItem('session_active_level', data.id);
-            activeLevelData = data; timeLeft = data.timeLimit; graceTime = 21; isGracePeriod = true; modalStage = "game";
+            activeLevelData = data; timeLeft = data.timeLimit; graceTime = 15; isGracePeriod = true; modalStage = "game";
             document.getElementById('modal-overlay').classList.remove('hidden');
-            document.getElementById('modal-id-display').innerText = `ID: ${data.id} // SEC_KAIROS`;
             updateModalUI(); startLevelTimer();
         }
 
-        function closeModal() {
-            document.getElementById('modal-overlay').classList.add('hidden');
-            if (timerInterval) clearInterval(timerInterval);
-            if (activeLevelData && completedLevels.includes(activeLevelData.id)) localStorage.removeItem('session_active_level');
-            activeLevelData = null;
-        }
+        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); if (timerInterval) clearInterval(timerInterval); activeLevelData = null; }
 
         function startLevelTimer() {
-            if (timerInterval) clearInterval(timerInterval);
-            updateTimerDisplay();
+            if (timerInterval) clearInterval(timerInterval); updateTimerDisplay();
             timerInterval = setInterval(() => {
-                if (isGracePeriod) {
-                    if (--graceTime <= 0) {
-                        isGracePeriod = false;
-                        document.getElementById('timer-display').classList.add('animate-pulse');
-                        setTimeout(() => document.getElementById('timer-display').classList.remove('animate-pulse'), 500);
-                    }
-                } else if (activeLevelData.id !== 1) {
-                    if (--timeLeft <= 0) {
-                        clearInterval(timerInterval); closeModal(); alert("TIEMPO AGOTADO.");
-                        applyLockout(activeLevelData.id); localStorage.removeItem('session_active_level');
-                    }
-                }
+                if (isGracePeriod) { if (--graceTime <= 0) isGracePeriod = false; }
+                else if (activeLevelData.id !== 1) { if (--timeLeft <= 0) { clearInterval(timerInterval); closeModal(); showSystemMessage("TIEMPO AGOTADO.", "error"); applyLockout(activeLevelData.id); } }
                 updateTimerDisplay();
             }, 1000);
         }
 
         function updateTimerDisplay() {
             const lbl = document.getElementById('timer-label'), disp = document.getElementById('timer-display'), bar = document.getElementById('time-bar');
-            if (isGracePeriod) {
-                lbl.innerText = "Lectura de Protocolo"; lbl.className = "text-[10px] text-stone-400 font-mono mb-3";
-                disp.innerText = graceTime + "s"; bar.style.width = "100%"; bar.className = "h-full bg-stone-700 transition-all";
-            } else {
-                lbl.innerText = activeLevelData.id === 1 ? "Tiempo Ilimitado" : "Tiempo Restante"; lbl.className = "text-[10px] text-green-600 font-mono mb-3";
-                disp.innerText = activeLevelData.id === 1 ? "∞" : `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`;
-                bar.style.width = activeLevelData.id === 1 ? "100%" : (timeLeft/activeLevelData.timeLimit)*100 + "%";
-                bar.className = "h-full bg-green-600 transition-all shadow-[0_0_10px_rgba(22,163,74,0.3)]";
-            }
+            if (isGracePeriod) { lbl.innerText = "Protocolo de Lectura"; disp.innerText = graceTime + "s"; bar.style.width = "100%"; bar.className = "h-full bg-stone-700"; }
+            else { lbl.innerText = activeLevelData.id === 1 ? "Ilimitado" : "Restante"; disp.innerText = activeLevelData.id === 1 ? "∞" : `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`; bar.style.width = activeLevelData.id === 1 ? "100%" : (timeLeft/activeLevelData.timeLimit)*100 + "%"; bar.className = "h-full bg-green-600"; }
         }
 
         function updateModalUI() {
@@ -404,138 +426,148 @@
             content.innerHTML = '';
             if (modalStage === "game") {
                 title.innerText = "Sistema de Defensa";
-                desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">KAIROS</strong><br><br><span class="text-stone-300 font-bold uppercase tracking-tighter">Reglas:</span><br>1. Victoria absoluta (Un empate reinicia el ciclo).<br>2. KAIROS presenta fluctuaciones críticas en su matriz. Vigilancia máxima.<br>3. Intentos ilimitados habilitados para este sector.`;
-                renderTTT(content);
-            } else {
-                title.innerText = "Clave Requerida"; desc.innerText = activeLevelData.question;
-                renderPad(content);
+                if(activeLevelData.game === 'tictactoe_impossible') {
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">KAIROS</strong><br><br>Supera el algoritmo de bloqueo para acceder a la clave del sector.`;
+                    renderTTT(content);
+                } else if (activeLevelData.game === 'lights_out') {
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MATRIZ ESCARLATA</strong><br><br>Apaga todos los nodos de tensión para estabilizar el núcleo.`;
+                    renderLightsOut(content);
+                }
+            } else { 
+                title.innerText = "Nivel de Seguridad 2"; 
+                desc.innerText = activeLevelData.question; 
+                if(activeLevelData.type === 'dial') renderDial(content);
+                else renderPad(content);
             }
             lucide.createIcons();
         }
 
+        // --- NIVEL 1: TIC TAC TOE ---
         function renderTTT(container) {
-            tttAttempts++; localStorage.setItem('maria_ttt_attempts', tttAttempts); syncCloud();
-            gameInternalState.board = Array(9).fill(null); gameInternalState.turn = Math.random() > 0.5; gameInternalState.active = true;
-            let html = '<div class="grid grid-cols-3 gap-3 mb-6">';
-            for(let i=0; i<9; i++) html += `<button onclick="handleTTT(${i})" id="ttt-${i}" class="w-20 h-20 rounded-xl bg-stone-800/50 border border-stone-700 text-3xl font-bold text-stone-500 transition-all hover:bg-stone-800 active:scale-95"></button>`;
-            html += `</div><div class="flex justify-between w-full px-4 text-[10px] font-mono text-stone-500 uppercase tracking-widest font-bold"><span>Ciclo: #${tttAttempts}</span><span id="ttt-status">Inicia: ${gameInternalState.turn ? 'María' : 'KAIROS'}</span></div>`;
+            tttAttempts++; localStorage.setItem('maria_ttt_attempts', tttAttempts);
+            gameInternalState.board = Array(9).fill(null); gameInternalState.turn = true; gameInternalState.active = true;
+            let html = '<div class="grid grid-cols-3 gap-5 mb-8">';
+            for(let i=0; i<9; i++) html += `<button onclick="handleTTT(${i})" id="ttt-${i}" class="w-24 h-24 rounded-3xl bg-stone-800/50 border border-stone-700 text-5xl font-bold text-stone-500 transition-all"></button>`;
+            html += `</div><div class="flex flex-col items-center gap-4">`;
+            html += `<div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center">Intento #${tttAttempts}</div></div>`;
             container.innerHTML = html;
-            if (!gameInternalState.turn) setTimeout(aiMove, 600);
         }
-
-        function handleTTT(idx) {
-            if (!gameInternalState.active || gameInternalState.board[idx] || !gameInternalState.turn) return;
-            gameInternalState.board[idx] = 'X'; updateBoard();
-            if (checkWin('X')) return finishTTT('V');
-            if (!gameInternalState.board.includes(null)) return finishTTT('E');
-            gameInternalState.turn = false; document.getElementById('ttt-status').innerText = "KAIROS Pensando...";
-            setTimeout(aiMove, 600);
-        }
-
+        function handleTTT(idx) { if (!gameInternalState.active || gameInternalState.board[idx] || !gameInternalState.turn) return; gameInternalState.board[idx] = 'X'; updateTTTBoard(); if (checkWinTTT('X')) return finishTTT('V'); if (!gameInternalState.board.includes(null)) return finishTTT('E'); gameInternalState.turn = false; setTimeout(aiMove, 600); }
         function aiMove() {
-            if (!gameInternalState.active) return;
-            const spots = gameInternalState.board.map((v,i) => v===null?i:null).filter(v=>v!==null);
-            let move;
-            if (tttAttempts % 21 === 0 && spots.length > 1) move = spots[Math.floor(Math.random()*spots.length)];
-            else move = minimax(gameInternalState.board, 'O').index;
-            
-            gameInternalState.board[move] = 'O'; updateBoard();
-            if (checkWin('O')) return finishTTT('F');
-            if (!gameInternalState.board.includes(null)) return finishTTT('E');
-            gameInternalState.turn = true; document.getElementById('ttt-status').innerText = "Tu Turno";
+            if (!gameInternalState.active) return; const move = minimaxTTT(gameInternalState.board, 'O').index;
+            gameInternalState.board[move] = 'O'; updateTTTBoard(); if (checkWinTTT('O')) return finishTTT('F'); if (!gameInternalState.board.includes(null)) return finishTTT('E'); gameInternalState.turn = true;
         }
-
-        function finishTTT(type) {
-            gameInternalState.active = false;
-            if (type === 'V') { modalStage = "question"; setTimeout(updateModalUI, 800); }
-            else if (type === 'F') { alert("Fallo: KAIROS ha vencido."); setTimeout(() => renderTTT(document.getElementById('modal-content')), 800); }
-            else { alert("Empate: Exijo perfección."); setTimeout(() => renderTTT(document.getElementById('modal-content')), 800); }
-        }
-
-        function updateBoard() {
-            gameInternalState.board.forEach((v,i) => {
-                const b = document.getElementById(`ttt-${i}`); if(!b) return;
-                b.innerText = v || '';
-                if(v === 'X') b.className = "w-20 h-20 rounded-xl bg-green-900/20 border border-green-600 text-3xl font-bold text-green-400";
-                if(v === 'O') b.className = "w-20 h-20 rounded-xl bg-stone-800 border border-stone-600 text-3xl font-bold text-white shadow-inner";
-            });
-        }
-
-        function checkWin(p) {
-            const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
-            return wins.some(l => l.every(i => gameInternalState.board[i] === p));
-        }
-
-        function minimax(board, p) {
-            const avail = board.map((v,i) => v===null?i:null).filter(v=>v!==null);
-            if (checkWin('X')) return {score:-10};
-            if (checkWin('O')) return {score:10};
-            if (avail.length === 0) return {score:0};
-            const moves = [];
-            for (let i=0; i<avail.length; i++) {
-                const m = {index: avail[i]};
-                board[avail[i]] = p;
-                m.score = minimax(board, p==='O'?'X':'O').score;
-                board[avail[i]] = null;
-                moves.push(m);
-            }
+        function finishTTT(type) { gameInternalState.active = false; if (type === 'V') { modalStage = "question"; updateModalUI(); } else { showSystemMessage(type === 'F' ? "KAIROS GANÓ. REINICIANDO..." : "EMPATE. REINTENTA.", "info"); setTimeout(() => renderTTT(document.getElementById('modal-content')), 1000); } }
+        function updateTTTBoard() { gameInternalState.board.forEach((v,i) => { const b = document.getElementById(`ttt-${i}`); if(b) { b.innerText = v || ''; if(v === 'X') b.className = "w-24 h-24 rounded-3xl bg-green-900/20 border border-green-600 text-5xl font-bold text-green-400"; if(v === 'O') b.className = "w-24 h-24 rounded-3xl bg-stone-800 border border-stone-600 text-5xl font-bold text-white"; } }); }
+        function checkWinTTT(p) { const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return wins.some(l => l.every(i => gameInternalState.board[i] === p)); }
+        function minimaxTTT(board, p) {
+            const avail = board.map((v,i) => v===null?i:null).filter(v=>v!==null); if (checkWinTTT('X')) return {score:-10}; if (checkWinTTT('O')) return {score:10}; if (avail.length === 0) return {score:0};
+            const moves = []; for (let i=0; i<avail.length; i++) { const m = {index: avail[i]}; board[avail[i]] = p; m.score = minimaxTTT(board, p==='O'?'X':'O').score; board[avail[i]] = null; moves.push(m); }
             return moves.reduce((a, b) => (p==='O' ? (b.score > a.score) : (b.score < a.score)) ? b : a);
         }
 
+        // --- NIVEL 2: LIGHTS OUT ---
+        function renderLightsOut(container) {
+            const size = 5; gameInternalState.active = true; gameInternalState.lights = Array(size * size).fill(false);
+            for(let i=0; i<15; i++) toggleMechanism(Math.floor(Math.random()*25), 5);
+            let html = '<div class="grid grid-cols-5 gap-3 mb-8">';
+            for(let i=0; i<25; i++) html += `<button onclick="handleLightClick(${i})" id="light-${i}" class="w-14 h-14 rounded-xl border light-btn ${gameInternalState.lights[i] ? 'light-on' : 'light-off'}"></button>`;
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        function handleLightClick(idx) { if (!gameInternalState.active) return; toggleMechanism(idx, 5); updateLightsUI(); if (gameInternalState.lights.every(l => !l)) { gameInternalState.active = false; showSystemMessage("DEFENSA DESACTIVADA.", "success"); modalStage = "question"; setTimeout(updateModalUI, 1000); } }
+        function toggleMechanism(idx, size) { const r = Math.floor(idx/size), c = idx%size; const ts = [[r,c],[r-1,c],[r+1,c],[r,c-1],[r,c+1]]; ts.forEach(([ro, co]) => { if (ro>=0 && ro<size && co>=0 && co<size) gameInternalState.lights[ro*size+co] = !gameInternalState.lights[ro*size+co]; }); }
+        function updateLightsUI() { gameInternalState.lights.forEach((isOn, i) => { const b = document.getElementById(`light-${i}`); if(b) b.className = `w-14 h-14 rounded-xl border light-btn ${isOn ? 'light-on' : 'light-off'}`; }); }
+
+        // --- DIAL ---
+        function renderDial(container) {
+            gameInternalState.inputValue = "0";
+            container.innerHTML = `
+                <div class="w-full max-w-[400px] space-y-12 animate-in fade-in flex flex-col items-center">
+                    <div id="dial-value" class="text-8xl font-extralight text-stone-300 font-mono tracking-tighter">0</div>
+                    <div class="w-full px-4">
+                        <input type="range" id="tension-slider" min="0" max="30" value="0" step="1" 
+                            oninput="updateDialVisual(this.value)" 
+                            class="w-full">
+                    </div>
+                    <button onclick="checkDialAnswer()" 
+                        class="px-12 py-4 bg-green-900/10 border border-green-700/30 text-green-400 rounded-2xl uppercase font-bold tracking-widest hover:bg-green-800/20 transition-all">
+                        ESTABLECER VALOR
+                    </button>
+                    <p class="text-[10px] text-stone-600 font-mono uppercase tracking-widest text-center">Protocolo de ajuste de intensidad</p>
+                </div>
+            `;
+        }
+        function updateDialVisual(val) {
+            gameInternalState.inputValue = val; 
+            const display = document.getElementById('dial-value'); 
+            display.innerText = val;
+            display.className = "text-8xl font-extralight text-stone-300 font-mono tracking-tighter";
+        }
+        function checkDialAnswer() {
+            if (gameInternalState.inputValue === activeLevelData.answer) {
+                if (!completedLevels.includes(activeLevelData.id)) {
+                    completedLevels.push(activeLevelData.id);
+                    if (activeLevelData.id === 1) genesisTimestamp = new Date().getTime();
+                }
+                saveToLocal(true); closeModal(); renderGrid();
+                showSystemMessage("IMPULSO CORRECTO. ACCESO CONCEDIDO.", "success");
+                setTimeout(showStory, 500);
+            } else {
+                showSystemMessage("VALOR INCORRECTO. SIGUE INTENTANDO.", "error");
+                document.getElementById('modal-overlay').classList.add('animate-shake');
+                setTimeout(() => document.getElementById('modal-overlay').classList.remove('animate-shake'), 300);
+            }
+        }
+
+        // --- PAD NUMÉRICO ---
         function renderPad(container) {
             gameInternalState.input = "";
-            container.innerHTML = `<div id="pad-disp" class="w-64 bg-black p-5 mb-4 text-center font-mono text-2xl border border-green-900/40 rounded-xl text-green-100 shadow-inner tracking-widest font-bold">DDMMAAAA</div><div id="pad-grid" class="grid grid-cols-3 gap-3 w-64"></div><div class="flex gap-2 w-64 mt-4"><button onclick="updPad('C')" class="flex-1 p-3 bg-red-900/10 text-red-500 border border-red-900/20 rounded-lg text-xs font-bold uppercase tracking-tighter">Borrar</button><button onclick="checkAns()" class="flex-1 p-3 bg-green-800 text-white rounded-lg text-xs font-bold shadow-lg uppercase tracking-widest hover:bg-green-700 transition-colors">Confirmar</button></div>`;
+            container.innerHTML = `<div id="pad-disp" class="w-80 bg-black p-8 mb-8 text-center font-mono text-4xl border border-green-900/40 rounded-3xl text-green-100 tracking-widest font-bold">...</div><div id="pad-grid" class="grid grid-cols-3 gap-5 w-80"></div><div class="flex gap-4 w-80 mt-8"><button onclick="updPad('C')" class="flex-1 p-5 bg-stone-800 text-stone-500 rounded-2xl text-xs font-bold uppercase">Borrar</button><button onclick="checkAns()" class="flex-1 p-5 bg-green-800 text-white rounded-2xl text-sm font-bold uppercase">Confirmar</button></div>`;
             renderButtons();
         }
-
         function renderButtons() {
             const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random()-0.5);
-            const grid = document.getElementById('pad-grid');
-            if (grid) grid.innerHTML = nums.map(n => `<button onclick="updPad(${n})" class="p-4 bg-stone-800 border border-stone-700 rounded-xl hover:bg-stone-700 transition-all active:scale-90 font-mono text-white">${n}</button>`).join('');
+            const grid = document.getElementById('pad-grid'); if (grid) grid.innerHTML = nums.map(n => `<button onclick="updPad(${n})" class="p-6 bg-stone-800 border border-stone-700 rounded-2xl font-mono text-white text-2xl">${n}</button>`).join('');
         }
-
-        function updPad(v) {
-            if (v==='C') gameInternalState.input = "";
-            else if (gameInternalState.input.length < 8) gameInternalState.input += v;
-            document.getElementById('pad-disp').innerText = gameInternalState.input || "DDMMAAAA";
-            if(v!=='C') renderButtons();
-        }
-
+        function updPad(v) { if (v==='C') gameInternalState.input = ""; else if (gameInternalState.input.length < 8) gameInternalState.input += v; const disp = document.getElementById('pad-disp'); if (disp) disp.innerText = gameInternalState.input || "..."; if(v!=='C') renderButtons(); }
         function checkAns() {
             if (gameInternalState.input === activeLevelData.answer) {
-                if (activeLevelData.id === 1 && !completedLevels.includes(1)) {
-                    completedLevels.push(1); genesisTimestamp = new Date().getTime();
-                } else if (!completedLevels.includes(activeLevelData.id)) completedLevels.push(activeLevelData.id);
-                saveToLocal(); closeModal(); renderGrid();
-                setTimeout(() => { alert("ACCESO CONCEDIDO: SECTOR RECUPERADO."); showStory(); }, 500);
-            } else { alert("ERROR DE CLAVE: ACCESO DENEGADO."); updPad('C'); }
+                if (!completedLevels.includes(activeLevelData.id)) {
+                    completedLevels.push(activeLevelData.id);
+                    if (activeLevelData.id === 1) genesisTimestamp = new Date().getTime();
+                }
+                saveToLocal(true); closeModal(); renderGrid();
+                showSystemMessage("ACCESO CONCEDIDO.", "success");
+                setTimeout(showStory, 500);
+            } else { showSystemMessage("CLAVE ERRÓNEA.", "error"); updPad('C'); }
         }
 
         function showStory() {
-            document.getElementById('story-screen').classList.remove('hidden');
+            document.getElementById('main-layout').classList.add('hidden');
+            document.getElementById('bg-effects').classList.add('hidden');
+            const screen = document.getElementById('story-screen'); screen.classList.remove('hidden');
             const container = document.getElementById('story-content'); container.innerHTML = "";
             const visible = RELATIONSHIP_DATA.filter(l => completedLevels.includes(l.id));
-            if (!visible.length) { container.innerHTML = "<p class='text-center text-stone-500'>No hay fragmentos recuperados aún.</p>"; return; }
             let fullHtml = "";
             visible.forEach(l => {
-                fullHtml += `<div class="mb-12 border-l-2 border-green-800 pl-6 pb-2"><span class="text-[10px] text-green-600 font-mono block mb-2 font-bold tracking-widest uppercase">LOG_0${l.id} // SECTOR RECUPERADO</span><div class="text-stone-300 leading-relaxed">${l.storyFragment}</div></div>`;
+                fullHtml += `<div class="mb-20 border-l-4 border-green-800 pl-12 pb-6"><span class="text-sm text-green-600 font-mono block mb-6 font-bold tracking-[0.4em] uppercase">LOG_0${l.id} // RECUPERADO</span><div class="text-stone-300 leading-relaxed text-2xl">${l.storyFragment}</div></div>`;
             });
             let i = 0;
             function type() {
                 if (i < fullHtml.length) {
                     let char = fullHtml.charAt(i), toAdd = char;
                     if (char === '<') {
-                        let tag = ""; while (fullHtml.charAt(i) !== '>') tag += fullHtml.charAt(i++);
-                        tag += '>'; toAdd = tag;
+                        let tag = ""; while (i < fullHtml.length && fullHtml.charAt(i) !== '>') tag += fullHtml.charAt(i++);
+                        if(i < fullHtml.length) tag += '>'; toAdd = tag;
                     }
                     container.innerHTML += toAdd; i++;
-                    setTimeout(type, toAdd.length > 1 ? 0 : 25);
+                    setTimeout(type, toAdd.length > 1 ? 0 : 20);
                 }
             }
             type();
         }
-
-        function closeStory() { document.getElementById('story-screen').classList.add('hidden'); }
+        function closeStory() { document.getElementById('story-screen').classList.add('hidden'); document.getElementById('main-layout').classList.remove('hidden'); document.getElementById('bg-effects').classList.remove('hidden'); }
     </script>
 </body>
 </html>
