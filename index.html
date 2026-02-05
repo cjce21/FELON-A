@@ -155,13 +155,58 @@
         .light-btn { transition: all 0.3s ease; }
         .light-on { background-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
         .light-off { background-color: #1c1917; border: 1px solid #292524; }
+
+        /* Estilos para las cartas de Memoria (Nivel 3) */
+        .memory-card {
+            perspective: 1000px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .memory-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.4s;
+            transform-style: preserve-3d;
+        }
+        .memory-card.flipped .memory-card-inner {
+            transform: rotateY(180deg);
+        }
+        .memory-card-front, .memory-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(22, 101, 52, 0.5);
+        }
+        .memory-card-front {
+            background-color: #1c1917; /* Stone 900 */
+        }
+        .memory-card-back {
+            background-color: #22c55e; /* Green 500 para acierto, o fondo del icono */
+            background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
+            color: #4ade80;
+            transform: rotateY(180deg);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        }
+        /* Carta Matcheada */
+        .memory-card.matched .memory-card-back {
+            border-color: #4ade80;
+            box-shadow: 0 0 20px #22c55e;
+        }
     </style>
 </head>
 <body class="font-sans selection:bg-green-700/30" oncontextmenu="return false" ondragstart="return false">
 
     <div id="system-notification-container"></div>
 
-    <!-- INTRO SEQUENCE (RESTAURADA COMPLETA) -->
+    <!-- INTRO SEQUENCE -->
     <div id="intro-screen" class="fixed inset-0 z-[1000] bg-black flex flex-col items-center justify-center p-8 font-mono text-green-500">
         <div class="max-w-xl w-full space-y-4">
             <div id="terminal-output" class="text-sm md:text-base leading-relaxed opacity-90 min-h-[200px]"></div>
@@ -208,10 +253,6 @@
                     <p class="text-[10px] text-stone-500 uppercase tracking-[0.3em] group-hover:text-green-400 transition-colors font-bold mt-2">Núcleo Operativo: Activo</p>
                 </div>
             </button>
-            <div id="lockout-alert" class="hidden flex items-center gap-4 px-6 py-3 bg-stone-900 border border-green-900/50 rounded-xl text-stone-400 text-sm shadow-[0_0_20px_rgba(20,83,45,0.3)] animate-pulse">
-                <i data-lucide="alert-octagon" class="w-5 h-5 text-green-500"></i>
-                <span class="font-mono font-bold uppercase tracking-widest hidden sm:inline">Abandono Detectado</span>
-            </div>
         </header>
 
         <main id="main-content" class="flex-1 w-full px-6 py-6 overflow-y-auto scrollbar-none opacity-0 transition-opacity duration-1000">
@@ -247,8 +288,6 @@
     </div>
 
     <script>
-        const GAS_URL = "https://script.google.com/macros/s/AKfycbwBIRpuQp9cXRi9G3ALJhj2gbVQOy1Rs5Ioxyl7-ef4AA-VpLMECetlcKnl6BXt6ZrOIg/exec"; 
-
         const RELATIONSHIP_DATA = [
             { 
                 id: 1, 
@@ -258,7 +297,7 @@
                 answer: "21032025", 
                 type: "chaospad", 
                 game: "tictactoe_impossible", 
-                timeLimit: 999999, 
+                timeLimit: 1260, // 21 minutos
                 icon: "car-front" 
             },
             { 
@@ -269,10 +308,20 @@
                 answer: "7", 
                 type: "dial", 
                 game: "lights_out", 
-                timeLimit: 1260, 
+                timeLimit: 1260, // 21 minutos
                 icon: "droplet" 
             },
-            { id: 3, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
+            { 
+                id: 3, 
+                title: "Cómplices", 
+                storyFragment: `La intimidad a medias del primer encuentro nos dejó un hambre voraz. Buscamos la revancha y la encontramos en aquella actividad con colegas, en el Airbnb. Mientras estábamos rodeados de todos, bajo las sábanas, el roce prohibido de nuestras manos encendía la mecha mientras fingíamos normalidad.<br><br>Al caer la noche y silenciarse la casa, el riesgo se convirtió en nuestra invitación. Me colé en tu habitación bajo el manto de la madrugada del 16 de abril. Esta vez, tomaste el control absoluto. No hubo pasividad; me usaste, me recorriste y me poseíste. En la cama, de pie, en el suelo... cada rincón fue testigo de nuestro deseo contenido.<br><br>Fueron horas de frenesí donde tú llevabas las riendas, una exploración activa y hambrienta que solo se detuvo cuando el sonido de la realidad —una colega despertando— amenazó nuestra burbuja. Tuve que huir de tu habitación, con el cuerpo saciado pero el alma pidiendo más.`, 
+                question: "CÁLCULO TEMPORAL: Días transcurridos entre el 'Pacto de Sangre' y la Infiltración Nocturna en el Airbnb. Sincroniza la matriz.", 
+                answer: "19", 
+                type: "sum_matrix", 
+                game: "memory_match", 
+                timeLimit: 1260, // 21 minutos
+                icon: "bed-double" 
+            },
             { id: 4, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 5, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 6, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
@@ -282,7 +331,7 @@
             { id: 10, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" }
         ];
 
-        let userId = "", completedLevels = [], genesisTimestamp = null, activeLockouts = {}, tttAttempts = 0;
+        let userId = "", completedLevels = [], levelTimestamps = {}, tttAttempts = 0;
         let activeLevelData = null, timeLeft = 0, graceTime = 0, isGracePeriod = false, timerInterval = null, modalStage = "game", gameInternalState = {};
 
         function showSystemMessage(message, type = 'info') {
@@ -297,10 +346,8 @@
 
         window.onload = () => { 
             initSession(); 
-            checkAbandonment(); 
             runIntroSequence(); 
             lucide.createIcons();
-            // Actualizar la interfaz en vivo cada minuto para que los contadores bajen solos
             setInterval(renderGrid, 60000);
         };
 
@@ -314,16 +361,14 @@
 
         function loadProgressLocal() {
             completedLevels = JSON.parse(localStorage.getItem('maria_completed') || '[]');
-            activeLockouts = JSON.parse(localStorage.getItem('maria_lockouts') || '{}');
+            levelTimestamps = JSON.parse(localStorage.getItem('maria_level_timestamps') || '{}');
             tttAttempts = parseInt(localStorage.getItem('maria_ttt_attempts') || '0');
-            const genesis = localStorage.getItem('maria_genesis_time');
-            if (genesis) genesisTimestamp = parseInt(genesis);
         }
 
         function saveToLocal(shouldSync = true) {
             localStorage.setItem('maria_completed', JSON.stringify(completedLevels));
+            localStorage.setItem('maria_level_timestamps', JSON.stringify(levelTimestamps));
             localStorage.setItem('maria_ttt_attempts', tttAttempts.toString());
-            if (genesisTimestamp) localStorage.setItem('maria_genesis_time', genesisTimestamp.toString());
         }
 
         function restoreSessionPrompt() {
@@ -361,41 +406,57 @@
             setTimeout(() => { scr.classList.add('hidden'); skipIntro(); }, 1000);
         }
 
-        function checkAbandonment() {
-            const act = localStorage.getItem('session_active_level');
-            if (act && !completedLevels.includes(parseInt(act)) && parseInt(act) !== 1) {
-                applyLockout(parseInt(act));
-                document.getElementById('lockout-alert').classList.remove('hidden');
-            }
-            localStorage.removeItem('session_active_level');
-        }
-
-        function applyLockout(id) {
-            if (id === 1) return;
-            activeLockouts[id] = new Date().getTime() + (3600000); 
-            localStorage.setItem('maria_lockouts', JSON.stringify(activeLockouts));
-            renderGrid();
-        }
-
         function renderGrid() {
             const grid = document.getElementById('level-grid'); if(!grid) return;
-            grid.innerHTML = ''; const now = new Date().getTime();
+            grid.innerHTML = ''; 
+            
+            // Obtener el tiempo actual y crear un objeto Date
+            const nowObj = new Date();
+            const now = nowObj.getTime();
+            
             RELATIONSHIP_DATA.forEach(lvl => {
                 const done = completedLevels.includes(lvl.id);
-                let locked = lvl.id !== 1, timeText = "BLOQUEADO";
+                let locked = true;
+                let timeText = "BLOQUEADO";
 
-                if (activeLockouts[lvl.id] > now) {
-                    locked = true; 
-                    const diff = activeLockouts[lvl.id] - now;
-                    timeText = `BLOQUEO: ${Math.ceil(diff/60000)}m`;
-                } else if (lvl.id !== 1 && completedLevels.includes(1)) { 
-                    const unlock = genesisTimestamp + ((lvl.id - 1) * 86400000);
-                    if (now >= unlock) locked = false;
-                    else { 
-                        const d = unlock - now; 
-                        timeText = `${Math.floor(d/3600000)}h ${Math.floor((d%3600000)/60000)}m`; 
+                // LÓGICA DE DESBLOQUEO ACTUALIZADA
+                if (lvl.id === 1) { 
+                    // Nivel 1 siempre desbloqueado
+                    locked = false; 
+                    timeText = "INICIAR";
+                } else {
+                    const prevLevelId = lvl.id - 1;
+                    if (completedLevels.includes(prevLevelId)) {
+                        // Obtener fecha de completado del nivel anterior
+                        const prevTimestamp = levelTimestamps[prevLevelId] || 0;
+                        const prevDate = new Date(prevTimestamp);
+                        
+                        // CALCULAR EL DÍA SIGUIENTE (00:00:00)
+                        // Crear una nueva fecha basada en la fecha de completado
+                        const unlockDate = new Date(prevDate);
+                        // Sumar un día
+                        unlockDate.setDate(unlockDate.getDate() + 1);
+                        // Resetear hora a medianoche (00:00:00.000)
+                        unlockDate.setHours(0, 0, 0, 0);
+                        
+                        // Comparar si el momento actual ya pasó la fecha de desbloqueo
+                        if (nowObj >= unlockDate) {
+                            locked = false;
+                            timeText = "ACCESO DIARIO";
+                        } else {
+                            locked = true;
+                            // Calcular tiempo restante hasta unlockDate
+                            const diff = unlockDate.getTime() - now;
+                            const hours = Math.floor(diff / 3600000);
+                            const minutes = Math.floor((diff % 3600000) / 60000);
+                            timeText = `DISPONIBLE EN: ${hours}h ${minutes}m`;
+                        }
+                    } else {
+                        // Nivel anterior no completado
+                        locked = true;
+                        timeText = "REQUIERE NIVEL " + prevLevelId;
                     }
-                } else if (lvl.id === 1) locked = false;
+                }
 
                 const btn = document.createElement('button');
                 const displayTitle = locked ? "SECTOR ENCRIPTADO" : lvl.title;
@@ -410,32 +471,52 @@
         }
 
         function openLevel(data) {
-            localStorage.setItem('session_active_level', data.id);
             activeLevelData = data; timeLeft = data.timeLimit; graceTime = 15; isGracePeriod = true; modalStage = "game";
             document.getElementById('modal-overlay').classList.remove('hidden');
             updateModalUI(); startLevelTimer();
         }
 
-        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); if (timerInterval) clearInterval(timerInterval); activeLevelData = null; }
+        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); if (timerInterval) clearInterval(timerInterval); activeLevelData = null; if(gameInternalState.animFrame) cancelAnimationFrame(gameInternalState.animFrame); if(gameInternalState.timeouts) gameInternalState.timeouts.forEach(clearTimeout); }
 
         function startLevelTimer() {
             if (timerInterval) clearInterval(timerInterval); updateTimerDisplay();
             timerInterval = setInterval(() => {
                 if (isGracePeriod) { if (--graceTime <= 0) isGracePeriod = false; }
-                else if (activeLevelData.id !== 1) { if (--timeLeft <= 0) { clearInterval(timerInterval); closeModal(); showSystemMessage("TIEMPO AGOTADO.", "error"); applyLockout(activeLevelData.id); } }
+                else { // Se quitó la restricción de ID 1
+                    if (--timeLeft <= 0) { 
+                        clearInterval(timerInterval); 
+                        closeModal(); 
+                        showSystemMessage("TIEMPO AGOTADO. REINTENTA.", "error"); 
+                    } 
+                }
                 updateTimerDisplay();
             }, 1000);
         }
 
         function updateTimerDisplay() {
             const lbl = document.getElementById('timer-label'), disp = document.getElementById('timer-display'), bar = document.getElementById('time-bar');
-            if (isGracePeriod) { lbl.innerText = "Protocolo de Lectura"; disp.innerText = graceTime + "s"; bar.style.width = "100%"; bar.className = "h-full bg-stone-700"; }
-            else { lbl.innerText = activeLevelData.id === 1 ? "Ilimitado" : "Restante"; disp.innerText = activeLevelData.id === 1 ? "∞" : `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`; bar.style.width = activeLevelData.id === 1 ? "100%" : (timeLeft/activeLevelData.timeLimit)*100 + "%"; bar.className = "h-full bg-green-600"; }
+            if (isGracePeriod) { 
+                lbl.innerText = "Protocolo de Lectura"; 
+                disp.innerText = graceTime + "s"; 
+                bar.style.width = "100%"; 
+                bar.className = "h-full bg-stone-700"; 
+            } else { 
+                // Se actualizaron las etiquetas para ser genéricas
+                lbl.innerText = "Restante"; 
+                disp.innerText = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`; 
+                bar.style.width = (timeLeft/activeLevelData.timeLimit)*100 + "%"; 
+                bar.className = "h-full bg-green-600"; 
+            }
         }
 
         function updateModalUI() {
             const title = document.getElementById('modal-title'), desc = document.getElementById('modal-desc'), content = document.getElementById('modal-content');
             content.innerHTML = '';
+            
+            // Limpiar estados anteriores
+            if(gameInternalState.animFrame) cancelAnimationFrame(gameInternalState.animFrame);
+            if(gameInternalState.timeouts) gameInternalState.timeouts.forEach(clearTimeout);
+
             if (modalStage === "game") {
                 title.innerText = "Sistema de Defensa";
                 if(activeLevelData.game === 'tictactoe_impossible') {
@@ -444,11 +525,16 @@
                 } else if (activeLevelData.game === 'lights_out') {
                     desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MATRIZ ESCARLATA</strong><br><br>Apaga todos los nodos de tensión para estabilizar el núcleo.`;
                     renderLightsOut(content);
+                } else if (activeLevelData.game === 'memory_match') {
+                    // DESCRIPCIÓN ACTUALIZADA NIVEL 3
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MNEMOSYNE</strong><br><br>Empareja los fragmentos de memoria dispersos. <strong class="text-red-500">ADVERTENCIA:</strong> La calavera corrupta reiniciará el sistema.`;
+                    renderMemoryMatch(content);
                 }
             } else { 
                 title.innerText = "Nivel de Seguridad 2"; 
                 desc.innerText = activeLevelData.question; 
                 if(activeLevelData.type === 'dial') renderDial(content);
+                else if (activeLevelData.type === 'sum_matrix') renderSumMatrix(content);
                 else renderPad(content);
             }
             lucide.createIcons();
@@ -491,6 +577,179 @@
         function toggleMechanism(idx, size) { const r = Math.floor(idx/size), c = idx%size; const ts = [[r,c],[r-1,c],[r+1,c],[r,c-1],[r,c+1]]; ts.forEach(([ro, co]) => { if (ro>=0 && ro<size && co>=0 && co<size) gameInternalState.lights[ro*size+co] = !gameInternalState.lights[ro*size+co]; }); }
         function updateLightsUI() { gameInternalState.lights.forEach((isOn, i) => { const b = document.getElementById(`light-${i}`); if(b) b.className = `w-14 h-14 rounded-xl border light-btn ${isOn ? 'light-on' : 'light-off'}`; }); }
 
+        // --- NIVEL 3: MEMORY MATCH (NUEVO) ---
+        function renderMemoryMatch(container) {
+            // Iconos solicitados: Pizza, Vino, Amigos (users), Piscina (waves), Camas (bed-double)
+            const iconSet = ['pizza', 'wine', 'users', 'waves', 'bed-double'];
+            // 2 calaveras trampas
+            const traps = ['skull', 'skull'];
+            
+            // Crear mazo: pares de iconos + trampas
+            let deck = [...iconSet, ...iconSet, ...traps];
+            // Barajar
+            deck.sort(() => Math.random() - 0.5);
+
+            gameInternalState = {
+                deck: deck,
+                flipped: [], // Indices de cartas volteadas actualmente
+                matched: [], // Indices de cartas ya emparejadas
+                locked: false, // Bloqueo mientras se verifican pares
+                active: true,
+                timeouts: []
+            };
+
+            let gridHtml = '<div class="grid grid-cols-4 gap-4 mb-4">';
+            deck.forEach((iconName, idx) => {
+                gridHtml += `
+                    <div class="memory-card w-16 h-16 md:w-20 md:h-20" onclick="handleMatchClick(${idx})" id="card-${idx}">
+                        <div class="memory-card-inner">
+                            <div class="memory-card-front text-stone-600 font-bold text-xl font-mono">?</div>
+                            <div class="memory-card-back ${iconName === 'skull' ? 'bg-red-900/50 border-red-500 text-red-500' : ''}">
+                                <i data-lucide="${iconName}" class="w-8 h-8"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            gridHtml += '</div>';
+            
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    ${gridHtml}
+                    <div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center mt-4">
+                        <span id="match-status">ENCUENTRA LOS PARES</span>
+                    </div>
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function handleMatchClick(idx) {
+            if (!gameInternalState.active || gameInternalState.locked) return;
+            if (gameInternalState.flipped.includes(idx) || gameInternalState.matched.includes(idx)) return;
+
+            // Voltear carta visualmente
+            const card = document.getElementById(`card-${idx}`);
+            card.classList.add('flipped');
+            gameInternalState.flipped.push(idx);
+
+            const iconName = gameInternalState.deck[idx];
+
+            // 1. Verificar si es TRAMPA (Calavera)
+            if (iconName === 'skull') {
+                gameInternalState.locked = true;
+                showSystemMessage("AMENAZA DETECTADA: CALAVERA", "error");
+                
+                // Efecto de sacudida en toda la pantalla
+                document.body.classList.add('animate-shake');
+                const status = document.getElementById('match-status');
+                if(status) {
+                    status.innerText = "¡ERROR CRÍTICO! REINICIANDO...";
+                    status.className = "text-xs font-mono text-red-500 font-bold uppercase tracking-widest animate-pulse";
+                }
+
+                setTimeout(() => {
+                    document.body.classList.remove('animate-shake');
+                    // Reiniciar el juego
+                    renderMemoryMatch(document.getElementById('modal-content'));
+                }, 1200);
+                return;
+            }
+
+            // 2. Verificar par si hay 2 cartas volteadas
+            if (gameInternalState.flipped.length === 2) {
+                gameInternalState.locked = true;
+                const idx1 = gameInternalState.flipped[0];
+                const idx2 = gameInternalState.flipped[1];
+                const icon1 = gameInternalState.deck[idx1];
+                const icon2 = gameInternalState.deck[idx2];
+
+                if (icon1 === icon2) {
+                    // COINCIDENCIA
+                    gameInternalState.matched.push(idx1, idx2);
+                    gameInternalState.flipped = [];
+                    gameInternalState.locked = false;
+                    
+                    document.getElementById(`card-${idx1}`).classList.add('matched');
+                    document.getElementById(`card-${idx2}`).classList.add('matched');
+
+                    // Verificar victoria (10 cartas matched, excluyendo las 2 calaveras)
+                    if (gameInternalState.matched.length === 10) {
+                         gameInternalState.active = false;
+                         showSystemMessage("ENLACE NEURAL ESTABLECIDO.", "success");
+                         setTimeout(() => { modalStage = "question"; updateModalUI(); }, 1000);
+                    }
+                } else {
+                    // NO COINCIDENCIA
+                    setTimeout(() => {
+                        document.getElementById(`card-${idx1}`).classList.remove('flipped');
+                        document.getElementById(`card-${idx2}`).classList.remove('flipped');
+                        gameInternalState.flipped = [];
+                        gameInternalState.locked = false;
+                    }, 1000);
+                }
+            }
+        }
+
+        // --- PREGUNTA: SUM MATRIX ---
+        function renderSumMatrix(container) {
+            gameInternalState = {
+                currentSum: 0,
+                selectedValues: []
+            };
+            
+            // Opciones para sumar 19: e.g. 10 + 5 + 2 + 2
+            const options = [10, 5, 8, 4, 3, 2, 2, 1, 7, 6, 12, 9];
+            // Shuffle
+            options.sort(() => Math.random() - 0.5);
+            
+            let gridHtml = '<div class="grid grid-cols-4 gap-4 mb-8">';
+            options.forEach((val, idx) => {
+                gridHtml += `<button onclick="toggleMatrixNum(this, ${val})" class="matrix-btn w-16 h-16 rounded-xl border border-stone-700 bg-stone-900 text-stone-500 font-mono text-xl font-bold hover:border-green-500/50 transition-all">${val}</button>`;
+            });
+            gridHtml += '</div>';
+            
+            container.innerHTML = `
+                <div class="flex flex-col items-center">
+                    <div class="mb-8 text-center">
+                        <div class="text-xs text-stone-500 uppercase tracking-widest mb-2">Desplazamiento Actual</div>
+                        <div id="matrix-sum" class="text-6xl font-mono text-stone-300 font-light">00</div>
+                        <div class="text-xs text-green-700 mt-2 font-mono">OBJETIVO: Sincronizar Delta</div>
+                    </div>
+                    ${gridHtml}
+                    <button onclick="checkMatrixSum()" class="mt-4 px-10 py-3 bg-green-900/20 border border-green-800 text-green-400 rounded-lg uppercase tracking-widest text-sm font-bold hover:bg-green-900/40">
+                        SINCRONIZAR
+                    </button>
+                </div>
+            `;
+        }
+        
+        function toggleMatrixNum(btn, val) {
+            if (btn.classList.contains('bg-green-600')) {
+                // Deselect
+                btn.classList.remove('bg-green-600', 'text-black', 'border-green-400');
+                btn.classList.add('bg-stone-900', 'text-stone-500', 'border-stone-700');
+                gameInternalState.currentSum -= val;
+            } else {
+                // Select
+                btn.classList.remove('bg-stone-900', 'text-stone-500', 'border-stone-700');
+                btn.classList.add('bg-green-600', 'text-black', 'border-green-400');
+                gameInternalState.currentSum += val;
+            }
+            document.getElementById('matrix-sum').innerText = gameInternalState.currentSum.toString().padStart(2, '0');
+        }
+        
+        function checkMatrixSum() {
+            if (gameInternalState.currentSum.toString() === activeLevelData.answer) {
+                completeLevelLogic();
+            } else {
+                showSystemMessage(`ERROR DE PARALAJE: ${gameInternalState.currentSum} != OBJ`, "error");
+                // Reset visual simple
+                document.getElementById('matrix-sum').classList.add('text-red-500');
+                setTimeout(() => document.getElementById('matrix-sum').classList.remove('text-red-500'), 500);
+            }
+        }
+
         // --- DIAL ---
         function renderDial(container) {
             gameInternalState.inputValue = "0";
@@ -518,13 +777,7 @@
         }
         function checkDialAnswer() {
             if (gameInternalState.inputValue === activeLevelData.answer) {
-                if (!completedLevels.includes(activeLevelData.id)) {
-                    completedLevels.push(activeLevelData.id);
-                    if (activeLevelData.id === 1) genesisTimestamp = new Date().getTime();
-                }
-                saveToLocal(true); closeModal(); renderGrid();
-                showSystemMessage("IMPULSO CORRECTO. ACCESO CONCEDIDO.", "success");
-                setTimeout(showStory, 500);
+                completeLevelLogic();
             } else {
                 showSystemMessage("VALOR INCORRECTO. SIGUE INTENTANDO.", "error");
                 document.getElementById('modal-overlay').classList.add('animate-shake');
@@ -545,14 +798,20 @@
         function updPad(v) { if (v==='C') gameInternalState.input = ""; else if (gameInternalState.input.length < 8) gameInternalState.input += v; const disp = document.getElementById('pad-disp'); if (disp) disp.innerText = gameInternalState.input || "..."; if(v!=='C') renderButtons(); }
         function checkAns() {
             if (gameInternalState.input === activeLevelData.answer) {
-                if (!completedLevels.includes(activeLevelData.id)) {
-                    completedLevels.push(activeLevelData.id);
-                    if (activeLevelData.id === 1) genesisTimestamp = new Date().getTime();
-                }
-                saveToLocal(true); closeModal(); renderGrid();
-                showSystemMessage("ACCESO CONCEDIDO.", "success");
-                setTimeout(showStory, 500);
+                completeLevelLogic();
             } else { showSystemMessage("CLAVE ERRÓNEA.", "error"); updPad('C'); }
+        }
+
+        // Lógica unificada de completado
+        function completeLevelLogic() {
+            if (!completedLevels.includes(activeLevelData.id)) {
+                completedLevels.push(activeLevelData.id);
+                // GUARDAR EL TIMESTAMP DEL MOMENTO DE COMPLETADO
+                levelTimestamps[activeLevelData.id] = new Date().getTime();
+            }
+            saveToLocal(true); closeModal(); renderGrid();
+            showSystemMessage("ACCESO CONCEDIDO.", "success");
+            setTimeout(showStory, 500);
         }
 
         function showStory() {
