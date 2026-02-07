@@ -2,20 +2,19 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PROYECTO FELONÍA</title>
-    <!-- Favicon: Huella Dactilar Verde -->
+    <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='%2322c55e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M2 12C2 6.5 6.5 2 12 2s10 4.5 10 10'/%3E%3Cpath d='M5 15c.5-4 4.5-7 7-7s6.5 3 7 7'/%3E%3Cpath d='M8 18c.5-2.5 2-4.5 4-4.5s3.5 2 4 4.5'/%3E%3Cpath d='M11 21c.5-1 1-1.5 1-1.5s.5.5 1 1.5'/%3E%3Cpath d='M12 12v.01'/%3E%3C/svg%3E">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Ocultar Scrollbar */
+        /* Estilos Globales y Utilidades */
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
         
-        /* Animaciones */
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-5px); }
@@ -26,7 +25,6 @@
         .fade-in { animation: fadeIn 0.5s ease-out forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         
-        /* Cursor parpadeante */
         .cursor-blink::after {
             content: '█';
             animation: blink 1s step-end infinite;
@@ -56,6 +54,7 @@
             flex-direction: column;
         }
 
+        /* UI Elementos */
         .level-card {
             width: 280px;
             height: 280px;
@@ -72,12 +71,15 @@
 
         .modal-content-area {
             height: 440px;
+            width: 100%;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
+            position: relative;
         }
 
+        /* Notificaciones */
         #system-notification-container {
             position: fixed;
             top: 2rem;
@@ -109,97 +111,44 @@
             gap: 1rem;
         }
 
-        @keyframes slideDownIn {
-            from { transform: translateY(-20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
+        @keyframes slideDownIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .notification-exit { animation: slideUpOut 0.4s ease-in forwards; }
+        @keyframes slideUpOut { from { transform: translateY(0); opacity: 1; } to { transform: translateY(-20px); opacity: 0; } }
 
-        .notification-exit {
-            animation: slideUpOut 0.4s ease-in forwards;
-        }
+        /* --- ESTILOS DE JUEGOS --- */
+        
+        /* Dial (Nivel 2) */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 12px; cursor: pointer; background: #1c1917; border-radius: 6px; border: 1px solid #166534; }
+        input[type=range]::-webkit-slider-thumb { height: 30px; width: 30px; border-radius: 50%; background: #22c55e; cursor: pointer; -webkit-appearance: none; margin-top: -10px; box-shadow: 0 0 15px rgba(34, 197, 94, 0.5); }
 
-        @keyframes slideUpOut {
-            from { transform: translateY(0); opacity: 1; }
-            to { transform: translateY(-20px); opacity: 0; }
-        }
-
-        /* Dial / Slider Personalizado */
-        input[type=range] {
-            -webkit-appearance: none;
-            width: 100%;
-            background: transparent;
-        }
-        input[type=range]::-webkit-slider-runnable-track {
-            width: 100%;
-            height: 12px;
-            cursor: pointer;
-            background: #1c1917;
-            border-radius: 6px;
-            border: 1px solid #166534;
-        }
-        input[type=range]::-webkit-slider-thumb {
-            height: 30px;
-            width: 30px;
-            border-radius: 50%;
-            background: #22c55e;
-            cursor: pointer;
-            -webkit-appearance: none;
-            margin-top: -10px;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
-        }
-
-        #story-screen { z-index: 500; }
-        #main-layout { display: flex; flex-direction: column; height: 100%; width: 100%; }
-
-        /* Lights Out */
+        /* Lights Out (Nivel 2) */
         .light-btn { transition: all 0.3s ease; }
         .light-on { background-color: #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
         .light-off { background-color: #1c1917; border: 1px solid #292524; }
 
-        /* Estilos para las cartas de Memoria (Nivel 3) */
-        .memory-card {
-            perspective: 1000px;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .memory-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            text-align: center;
-            transition: transform 0.4s;
-            transform-style: preserve-3d;
-        }
-        .memory-card.flipped .memory-card-inner {
-            transform: rotateY(180deg);
-        }
-        .memory-card-front, .memory-card-back {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            -webkit-backface-visibility: hidden;
-            backface-visibility: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0.5rem;
-            border: 1px solid rgba(22, 101, 52, 0.5);
-        }
-        .memory-card-front {
-            background-color: #1c1917; /* Stone 900 */
-        }
-        .memory-card-back {
-            background-color: #22c55e; /* Green 500 para acierto, o fondo del icono */
-            background: radial-gradient(circle, #064e3b 0%, #022c22 100%);
-            color: #4ade80;
-            transform: rotateY(180deg);
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
-        }
-        /* Carta Matcheada */
-        .memory-card.matched .memory-card-back {
-            border-color: #4ade80;
-            box-shadow: 0 0 20px #22c55e;
-        }
+        /* Memory (Nivel 3) */
+        .memory-card { perspective: 1000px; cursor: pointer; transition: transform 0.2s; }
+        .memory-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.4s; transform-style: preserve-3d; }
+        .memory-card.flipped .memory-card-inner { transform: rotateY(180deg); }
+        .memory-card-front, .memory-card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 0.5rem; border: 1px solid rgba(22, 101, 52, 0.5); }
+        .memory-card-front { background-color: #1c1917; }
+        .memory-card-back { background: radial-gradient(circle, #064e3b 0%, #022c22 100%); color: #4ade80; transform: rotateY(180deg); box-shadow: 0 0 15px rgba(34, 197, 94, 0.3); }
+        .memory-card.matched .memory-card-back { border-color: #4ade80; box-shadow: 0 0 20px #22c55e; }
+
+        /* Spider & Catch Canvas */
+        #spider-canvas, #catch-canvas { background: radial-gradient(circle at center, #1c1917 0%, #000000 100%); cursor: crosshair; border-radius: 8px; border: 1px solid #3f3f46; }
+        #catch-canvas { cursor: none; }
+
+        /* Drag (Nivel 5) */
+        .draggable-item { cursor: grab; user-select: none; touch-action: none; transition: transform 0.1s, box-shadow 0.2s; }
+        .draggable-item:active { cursor: grabbing; transform: scale(1.05); z-index: 100; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .draggable-item.dragging { opacity: 0.5; }
+        
+        /* Food Grid (Nivel 4) */
+        .food-item { transition: all 0.2s; height: 100px; width: 100%; }
+        .food-item.selected { background-color: #15803d; border-color: #4ade80; color: #fff; box-shadow: 0 0 10px rgba(74, 222, 128, 0.4); }
+
     </style>
 </head>
 <body class="font-sans selection:bg-green-700/30" oncontextmenu="return false" ondragstart="return false">
@@ -228,7 +177,7 @@
     </div>
 
     <!-- PANTALLA DE HISTORIA -->
-    <div id="story-screen" class="hidden fixed inset-0 bg-stone-950 p-6 md:p-12 flex flex-col items-center justify-start font-serif text-center overflow-y-auto scrollbar-none">
+    <div id="story-screen" class="hidden fixed inset-0 bg-stone-950 p-6 md:p-12 flex flex-col items-center justify-start font-serif text-center overflow-y-auto scrollbar-none z-[500]">
         <div class="max-w-5xl w-full relative z-10 pt-10 px-4">
             <button onclick="closeStory()" class="absolute top-0 right-0 text-stone-500 hover:text-green-400 transition-colors z-[600] p-4">
                 <i data-lucide="x" class="w-12 h-12"></i>
@@ -242,7 +191,8 @@
         </div>
     </div>
 
-    <div id="main-layout" class="relative z-10">
+    <!-- LAYOUT PRINCIPAL -->
+    <div id="main-layout" class="relative z-10 flex flex-col h-full w-full">
         <header id="main-header" class="w-full pl-6 pr-10 py-8 flex justify-between items-center z-[100] opacity-0 transition-opacity duration-1000">
             <button onclick="showStory()" class="flex items-center gap-6 group cursor-pointer hover:opacity-80 transition-opacity text-left">
                 <div class="p-3 bg-green-900/10 rounded-xl group-hover:bg-green-900/20 border border-green-900/20 transition-all shadow-[0_0_20px_rgba(22,163,74,0.15)]">
@@ -256,14 +206,16 @@
         </header>
 
         <main id="main-content" class="flex-1 w-full px-6 py-6 overflow-y-auto scrollbar-none opacity-0 transition-opacity duration-1000">
-            <div id="level-grid" class="w-full flex flex-wrap justify-center gap-8 md:gap-12"></div>
+            <div id="level-grid" class="w-full flex flex-wrap justify-center gap-8 md:gap-12 pb-20"></div>
         </main>
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL (Niveles y Juegos) -->
     <div id="modal-overlay" class="hidden fixed inset-0 z-[800] bg-stone-950/90 backdrop-blur-md flex items-center justify-center p-6">
         <div class="w-full max-w-5xl bg-stone-900/95 border border-green-800/30 rounded-3xl shadow-[0_0_100px_rgba(0,0,0,1)] flex flex-col md:flex-row min-h-[600px] zoom-in relative overflow-hidden">
+            <!-- Sidebar del Modal -->
             <div class="w-full md:w-1/3 bg-stone-950 p-10 border-b md:border-b-0 md:border-r border-green-900/20 flex flex-col justify-between relative">
+                <button onclick="closeModal()" class="absolute top-4 left-4 text-stone-600 hover:text-stone-300 md:hidden"><i data-lucide="arrow-left"></i></button>
                 <div class="absolute top-0 left-0 w-full h-1.5 bg-stone-900">
                     <div id="time-bar" class="h-full bg-gradient-to-r from-green-800 to-green-600 transition-all duration-1000 ease-linear"></div>
                 </div>
@@ -281,13 +233,15 @@
                 <div class="text-xs text-stone-600 font-mono mt-auto uppercase tracking-widest opacity-50" id="modal-id-display">ID: 01 // SEC_HEX</div>
             </div>
             
+            <!-- Área de Juego/Contenido -->
             <div class="w-full md:w-2/3 p-10 flex items-center justify-center bg-stone-900/30 relative overflow-hidden">
-                <div id="modal-content" class="w-full modal-content-area space-y-8"></div>
+                <div id="modal-content" class="w-full modal-content-area space-y-8 relative"></div>
             </div>
         </div>
     </div>
 
     <script>
+        // --- CONFIGURACIÓN DE NIVELES ---
         const RELATIONSHIP_DATA = [
             { 
                 id: 1, 
@@ -295,9 +249,9 @@
                 storyFragment: `Fue en mi cumpleaños, el 21 de marzo de 2025. Tú asististe a esa actividad que me organizaron, y aunque tu decisión oficial era llevarme al metro, terminaste conduciendo hacia mi casa. Sin embargo, el destino tenía otros planes y nos detuvimos antes, en una esquina oscura bajo el manto de la noche.<br><br>Allí, la tensión sexual que habíamos estado cocinando a fuego lento durante todo el camino —alimentada por aquel contrato de sumisión que firmamos días atrás— finalmente detonó. No hubo palabras, solo acción. Nos empezamos a besar con urgencia, a tocarnos, a chuparnos... Los minutos se diluyeron en un caos de deseo absoluto donde nada más importaba.<br><br>Todo escaló peligrosamente rápido, una espiral de pasión que amenazaba con consumirnos ahí mismo, hasta que la realidad nos obligó a parar. Tuvimos que irnos, cada uno a su destino, pero marcados por la certeza de que algo irreversible había comenzado en esa esquina.`, 
                 question: "Equinoccio de Primavera del año de la Singularidad (DDMMAAAA).", 
                 answer: "21032025", 
-                type: "chaospad", 
+                type: "pad", 
                 game: "tictactoe_impossible", 
-                timeLimit: 1260, // 21 minutos
+                timeLimit: 1260,
                 icon: "car-front" 
             },
             { 
@@ -308,7 +262,7 @@
                 answer: "7", 
                 type: "dial", 
                 game: "lights_out", 
-                timeLimit: 1260, // 21 minutos
+                timeLimit: 1260,
                 icon: "droplet" 
             },
             { 
@@ -319,11 +273,32 @@
                 answer: "19", 
                 type: "sum_matrix", 
                 game: "memory_match", 
-                timeLimit: 1260, // 21 minutos
+                timeLimit: 1260,
                 icon: "bed-double" 
             },
-            { id: 4, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
-            { id: 5, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
+            { 
+                id: 4, 
+                title: "La Graduación", 
+                storyFragment: `Aquel fin de semana del 6 al 8 de junio de 2025, el mundo celebró graduaciones, pero nosotros celebramos algo más íntimo en aquel Airbnb. Fue el descubrimiento de la domesticidad. No se trató solo de pasión, sino de la calma de la mañana siguiente.<br><br>Recuerdo cocinar contigo, el olor a salchichas y tostadas francesas llenando la cocina, y compartir pica pollo en la cama sin pretensiones. Por primera vez, dormimos juntos como si fuera nuestra rutina de siempre, 'jugando' a ser esposos en una burbuja perfecta.<br><br>Esos días me enseñaron que la intimidad no es solo piel con piel, sino preparar el desayuno para el otro y sentir que, en ese pequeño espacio, éramos una familia completa.`, 
+                question: "SELECCIÓN DE SUMINISTROS: Identifica los 3 elementos sagrados consumidos durante nuestra convivencia.", 
+                answer: ["SALCHICHAS", "PICA POLLO", "TOSTADAS FRANCESAS"], 
+                type: "food_grid", 
+                game: "love_catch", 
+                timeLimit: 1260, 
+                icon: "graduation-cap" 
+            },
+            { 
+                id: 5, 
+                title: "La Telaraña", 
+                storyFragment: `Octubre (del 3 al 5) trajo un aire más frío. Volvimos a escapar, esta vez sumergidos en el maratón de 'I Was Reincarnated as the 7th Prince...', usándolo como refugio. Pero la realidad encontró una grieta por donde entrar.<br><br>Tuvimos nuestra primera gran discusión, un desacuerdo nacido en la intimidad que escaló hasta el silencio. Te fuiste a dormir al mueble de la sala, y esa distancia física, aunque de pocos metros, se sintió como un océano. Dormir solo en la cama sabiendo que estabas incómoda afuera fue doloroso.<br><br>Para colmo, el sábado el deber te llamó. Verte salir hacia el trabajo me dejó solo en el apartamento, enfrentando los ecos de la pelea y la soledad. Fue un recordatorio brutal de que amar también implica navegar los días difíciles y las obligaciones que nos separan.`, 
+                question: "RECONSTRUCCIÓN DE DATOS: Ordena correctamente el título del anime visto.", 
+                answer: "I Was Reincarnated as the 7th Prince so I Can Take My Time Perfecting My Magical Ability", 
+                type: "anime_drag", 
+                game: "spider_defense", 
+                timeLimit: 1260, 
+                icon: "bug" 
+            },
+            // NIVELES PLACEHOLDER
             { id: 6, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 7, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
             { id: 8, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" },
@@ -331,9 +306,23 @@
             { id: 10, title: "DATA ENCRIPTADA", storyFragment: "...", question: "TBD", answer: "TBD", type: "TBD", game: "TBD", timeLimit: 1260, icon: "lock" }
         ];
 
+        // --- ESTADO GLOBAL ---
         let userId = "", completedLevels = [], levelTimestamps = {}, tttAttempts = 0;
-        let activeLevelData = null, timeLeft = 0, graceTime = 0, isGracePeriod = false, timerInterval = null, modalStage = "game", gameInternalState = {};
+        let activeLevelData = null, timeLeft = 0, graceTime = 0, isGracePeriod = false, timerInterval = null, modalStage = "game";
+        
+        let gameInternalState = {
+            active: false,
+            animFrame: null,
+            timeouts: [],
+            intervals: [],
+            // Props específicas de juegos
+            snake: null,
+            spiders: [],
+            loveCatch: { playerX: 150, items: [], score: 0 }, // Nuevo estado
+            selectedFood: []
+        };
 
+        // --- SISTEMA BASE ---
         function showSystemMessage(message, type = 'info') {
             const container = document.getElementById('system-notification-container');
             const notification = document.createElement('div');
@@ -365,7 +354,7 @@
             tttAttempts = parseInt(localStorage.getItem('maria_ttt_attempts') || '0');
         }
 
-        function saveToLocal(shouldSync = true) {
+        function saveToLocal() {
             localStorage.setItem('maria_completed', JSON.stringify(completedLevels));
             localStorage.setItem('maria_level_timestamps', JSON.stringify(levelTimestamps));
             localStorage.setItem('maria_ttt_attempts', tttAttempts.toString());
@@ -378,7 +367,7 @@
 
         async function runIntroSequence() {
             const out = document.getElementById('terminal-output'), loader = document.getElementById('loading-container');
-            const lines = ["ENLACE: DIDAC-CLICK GROUP SECURE SERVER", "ESTABLECIENDO CONEXIÓN SEGURA...", "ACCEDIENDO AL NÚCLEO DE MEMORIA...", "INICIANDO PROTOCOLO: PROYECTO FELONÍA v1.0", "ESTADO: ESPERANDO USUARIO."];
+            const lines = ["ENLACE: DIDAC-CLICK GROUP SECURE SERVER", "ESTABLECIENDO CONEXIÓN SEGURA...", "ACCEDIENDO AL NÚCLEO DE MEMORIA...", "INICIANDO PROTOCOLO: PROYECTO FELONÍA v2.6", "ESTADO: ESPERANDO USUARIO."];
             if (completedLevels.length > 0) { skipIntro(); return; }
             for (let line of lines) {
                 const p = document.createElement('div'); p.className = "mb-4 text-green-500 font-mono text-lg"; p.innerHTML = "> "; out.appendChild(p);
@@ -406,55 +395,39 @@
             setTimeout(() => { scr.classList.add('hidden'); skipIntro(); }, 1000);
         }
 
+        // --- RENDERIZADO DEL GRID ---
         function renderGrid() {
             const grid = document.getElementById('level-grid'); if(!grid) return;
             grid.innerHTML = ''; 
-            
-            // Obtener el tiempo actual y crear un objeto Date
-            const nowObj = new Date();
-            const now = nowObj.getTime();
+            const nowObj = new Date(); const now = nowObj.getTime();
             
             RELATIONSHIP_DATA.forEach(lvl => {
                 const done = completedLevels.includes(lvl.id);
                 let locked = true;
                 let timeText = "BLOQUEADO";
 
-                // LÓGICA DE DESBLOQUEO ACTUALIZADA
                 if (lvl.id === 1) { 
-                    // Nivel 1 siempre desbloqueado
-                    locked = false; 
-                    timeText = "INICIAR";
+                    locked = false; timeText = "INICIAR";
                 } else {
                     const prevLevelId = lvl.id - 1;
                     if (completedLevels.includes(prevLevelId)) {
-                        // Obtener fecha de completado del nivel anterior
                         const prevTimestamp = levelTimestamps[prevLevelId] || 0;
                         const prevDate = new Date(prevTimestamp);
-                        
-                        // CALCULAR EL DÍA SIGUIENTE (00:00:00)
-                        // Crear una nueva fecha basada en la fecha de completado
                         const unlockDate = new Date(prevDate);
-                        // Sumar un día
-                        unlockDate.setDate(unlockDate.getDate() + 1);
-                        // Resetear hora a medianoche (00:00:00.000)
-                        unlockDate.setHours(0, 0, 0, 0);
+                        unlockDate.setDate(unlockDate.getDate() + 1); 
+                        unlockDate.setHours(0, 0, 0, 0); 
                         
-                        // Comparar si el momento actual ya pasó la fecha de desbloqueo
                         if (nowObj >= unlockDate) {
-                            locked = false;
-                            timeText = "ACCESO DIARIO";
+                            locked = false; timeText = "ACCESO DIARIO";
                         } else {
                             locked = true;
-                            // Calcular tiempo restante hasta unlockDate
                             const diff = unlockDate.getTime() - now;
                             const hours = Math.floor(diff / 3600000);
                             const minutes = Math.floor((diff % 3600000) / 60000);
                             timeText = `DISPONIBLE EN: ${hours}h ${minutes}m`;
                         }
                     } else {
-                        // Nivel anterior no completado
-                        locked = true;
-                        timeText = "REQUIERE NIVEL " + prevLevelId;
+                        locked = true; timeText = "REQUIERE NIVEL " + prevLevelId;
                     }
                 }
 
@@ -470,19 +443,34 @@
             lucide.createIcons();
         }
 
+        // --- SISTEMA DE MODALES ---
         function openLevel(data) {
             activeLevelData = data; timeLeft = data.timeLimit; graceTime = 15; isGracePeriod = true; modalStage = "game";
             document.getElementById('modal-overlay').classList.remove('hidden');
             updateModalUI(); startLevelTimer();
         }
 
-        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); if (timerInterval) clearInterval(timerInterval); activeLevelData = null; if(gameInternalState.animFrame) cancelAnimationFrame(gameInternalState.animFrame); if(gameInternalState.timeouts) gameInternalState.timeouts.forEach(clearTimeout); }
+        function closeModal() { 
+            document.getElementById('modal-overlay').classList.add('hidden'); 
+            if (timerInterval) clearInterval(timerInterval); 
+            activeLevelData = null; 
+            cleanGameInternalState();
+        }
+
+        function cleanGameInternalState() {
+            gameInternalState.active = false;
+            if(gameInternalState.animFrame) cancelAnimationFrame(gameInternalState.animFrame);
+            if(gameInternalState.timeouts) gameInternalState.timeouts.forEach(clearTimeout);
+            if(gameInternalState.intervals) gameInternalState.intervals.forEach(clearInterval);
+            gameInternalState.timeouts = [];
+            gameInternalState.intervals = [];
+        }
 
         function startLevelTimer() {
             if (timerInterval) clearInterval(timerInterval); updateTimerDisplay();
             timerInterval = setInterval(() => {
                 if (isGracePeriod) { if (--graceTime <= 0) isGracePeriod = false; }
-                else { // Se quitó la restricción de ID 1
+                else { 
                     if (--timeLeft <= 0) { 
                         clearInterval(timerInterval); 
                         closeModal(); 
@@ -501,7 +489,6 @@
                 bar.style.width = "100%"; 
                 bar.className = "h-full bg-stone-700"; 
             } else { 
-                // Se actualizaron las etiquetas para ser genéricas
                 lbl.innerText = "Restante"; 
                 disp.innerText = `${Math.floor(timeLeft/60)}:${(timeLeft%60).toString().padStart(2,'0')}`; 
                 bar.style.width = (timeLeft/activeLevelData.timeLimit)*100 + "%"; 
@@ -512,13 +499,11 @@
         function updateModalUI() {
             const title = document.getElementById('modal-title'), desc = document.getElementById('modal-desc'), content = document.getElementById('modal-content');
             content.innerHTML = '';
-            
-            // Limpiar estados anteriores
-            if(gameInternalState.animFrame) cancelAnimationFrame(gameInternalState.animFrame);
-            if(gameInternalState.timeouts) gameInternalState.timeouts.forEach(clearTimeout);
+            cleanGameInternalState();
 
             if (modalStage === "game") {
                 title.innerText = "Sistema de Defensa";
+
                 if(activeLevelData.game === 'tictactoe_impossible') {
                     desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">KAIROS</strong><br><br>Supera el algoritmo de bloqueo para acceder a la clave del sector.`;
                     renderTTT(content);
@@ -526,290 +511,436 @@
                     desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MATRIZ ESCARLATA</strong><br><br>Apaga todos los nodos de tensión para estabilizar el núcleo.`;
                     renderLightsOut(content);
                 } else if (activeLevelData.game === 'memory_match') {
-                    // DESCRIPCIÓN ACTUALIZADA NIVEL 3
-                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MNEMOSYNE</strong><br><br>Empareja los fragmentos de memoria dispersos. <strong class="text-red-500">ADVERTENCIA:</strong> La calavera corrupta reiniciará el sistema.`;
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">MNEMOSYNE</strong><br><br>Empareja los fragmentos de memoria dispersos.`;
                     renderMemoryMatch(content);
+                } else if (activeLevelData.game === 'love_catch') {
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">HESTIA</strong><br><br>Orden Doméstico. Atrapa los momentos de amor (💚/🏠) y evita las distracciones del tiempo (⏰/📱).`;
+                    renderLoveCatch(content);
+                } else if (activeLevelData.game === 'spider_defense') {
+                    desc.innerHTML = `GUARDIÁN: <strong class="text-green-400">ARACHNE</strong><br><br>Purga Arácnida. Elimina las amenazas antes de que infecten el núcleo.`;
+                    renderSpiderDefense(content);
                 }
             } else { 
                 title.innerText = "Nivel de Seguridad 2"; 
                 desc.innerText = activeLevelData.question; 
+
                 if(activeLevelData.type === 'dial') renderDial(content);
                 else if (activeLevelData.type === 'sum_matrix') renderSumMatrix(content);
+                else if (activeLevelData.type === 'food_grid') renderFoodGrid(content);
+                else if (activeLevelData.type === 'anime_drag') renderAnimeDrag(content);
                 else renderPad(content);
             }
             lucide.createIcons();
         }
 
-        // --- NIVEL 1: TIC TAC TOE ---
+        // ==========================================
+        // === MINIJUEGOS ===
+        // ==========================================
+
+        // --- NIVEL 4: LOVE CATCH (No Spoilers) ---
+        function renderLoveCatch(container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col items-center relative";
+            wrapper.innerHTML = `<canvas id="catch-canvas" width="300" height="400" class="mb-4"></canvas><p class="text-xs font-mono text-green-500">MOMENTOS: <span id="catch-score">0</span> / 10</p><p class="text-[10px] text-stone-500 mt-2 font-mono uppercase">Mueve el mouse/dedo para proteger la burbuja</p>`;
+            container.appendChild(wrapper);
+
+            const canvas = document.getElementById('catch-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            gameInternalState.active = true;
+            gameInternalState.loveCatch = { 
+                playerX: canvas.width / 2, 
+                playerWidth: 70,
+                playerHeight: 12,
+                items: [], 
+                score: 0 
+            };
+            
+            // Input Handler
+            const updatePos = (x) => {
+                const rect = canvas.getBoundingClientRect();
+                let newX = x - rect.left;
+                // Clamp
+                if (newX < gameInternalState.loveCatch.playerWidth/2) newX = gameInternalState.loveCatch.playerWidth/2;
+                if (newX > canvas.width - gameInternalState.loveCatch.playerWidth/2) newX = canvas.width - gameInternalState.loveCatch.playerWidth/2;
+                gameInternalState.loveCatch.playerX = newX;
+            };
+
+            canvas.addEventListener('mousemove', e => updatePos(e.clientX));
+            canvas.addEventListener('touchmove', e => { e.preventDefault(); updatePos(e.touches[0].clientX); });
+
+            let frameCount = 0;
+            const spawnRate = 45;
+
+            function loop() {
+                if(!gameInternalState.active) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                frameCount++;
+
+                // Spawn Items (Hearts/Home vs Clock/Phone)
+                if (frameCount % spawnRate === 0) {
+                    const isBad = Math.random() > 0.65;
+                    const type = isBad ? (Math.random()>0.5 ? '⏰' : '📱') : (Math.random() < 0.6 ? '💚' : '🏠');
+                    gameInternalState.loveCatch.items.push({
+                        x: Math.random() * (canvas.width - 30) + 15,
+                        y: -20,
+                        type: type,
+                        isBad: isBad,
+                        speed: Math.random() * 2 + 2
+                    });
+                }
+
+                // Draw Player (White Bar / Shield)
+                ctx.fillStyle = "#fff";
+                ctx.shadowBlur = 10; ctx.shadowColor = "#fff";
+                ctx.fillRect(gameInternalState.loveCatch.playerX - gameInternalState.loveCatch.playerWidth/2, canvas.height - 30, gameInternalState.loveCatch.playerWidth, gameInternalState.loveCatch.playerHeight);
+                ctx.shadowBlur = 0;
+
+                // Update & Draw Items
+                for (let i = gameInternalState.loveCatch.items.length - 1; i >= 0; i--) {
+                    let item = gameInternalState.loveCatch.items[i];
+                    item.y += item.speed;
+
+                    ctx.font = "26px Arial";
+                    ctx.textAlign = "center";
+                    ctx.fillText(item.type, item.x, item.y);
+
+                    // Collision Check
+                    if (item.y > canvas.height - 40 && item.y < canvas.height - 10) {
+                        if (Math.abs(item.x - gameInternalState.loveCatch.playerX) < gameInternalState.loveCatch.playerWidth/2 + 15) {
+                            // Hit
+                            if (item.isBad) {
+                                gameInternalState.active = false;
+                                showSystemMessage("REALIDAD INTRUSIVA DETECTADA.", "error");
+                                setTimeout(() => renderLoveCatch(document.getElementById('modal-content')), 1500);
+                                return;
+                            } else {
+                                gameInternalState.loveCatch.score++;
+                                document.getElementById('catch-score').innerText = gameInternalState.loveCatch.score;
+                                gameInternalState.loveCatch.items.splice(i, 1);
+                                
+                                if (gameInternalState.loveCatch.score >= 10) {
+                                    gameInternalState.active = false;
+                                    showSystemMessage("CONEXIÓN ESTABLECIDA.", "success");
+                                    setTimeout(() => { modalStage = "question"; updateModalUI(); }, 1000);
+                                    return;
+                                }
+                                continue;
+                            }
+                        }
+                    }
+
+                    if (item.y > canvas.height) {
+                        gameInternalState.loveCatch.items.splice(i, 1);
+                    }
+                }
+
+                gameInternalState.animFrame = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // --- NIVEL 5: SPIDER DEFENSE ---
+        function renderSpiderDefense(container) {
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col items-center";
+            wrapper.innerHTML = `<div class="relative"><canvas id="spider-canvas" width="300" height="400"></canvas><div class="absolute top-2 right-2 text-xs font-mono text-green-500">KILLS: <span id="spider-kills">0</span>/15</div></div><div class="text-[10px] text-stone-500 mt-2 font-mono uppercase">Toca las arañas para exterminarlas</div>`;
+            container.appendChild(wrapper);
+            
+            const canvas = document.getElementById('spider-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            gameInternalState.active = true;
+            gameInternalState.spiders = [];
+            let kills = 0;
+            let spawnRate = 60;
+            let frameCount = 0;
+
+            const clickHandler = (e) => {
+                if(!gameInternalState.active) return;
+                const rect = canvas.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                
+                for(let i=gameInternalState.spiders.length-1; i>=0; i--) {
+                    const s = gameInternalState.spiders[i];
+                    const dist = Math.sqrt((x-s.x)**2 + (y-s.y)**2);
+                    if(dist < 30) {
+                        gameInternalState.spiders.splice(i, 1);
+                        kills++;
+                        document.getElementById('spider-kills').innerText = kills;
+                        // Efecto visual de "splat"
+                        ctx.fillStyle = "#22c55e"; ctx.beginPath(); ctx.arc(s.x, s.y, 15, 0, Math.PI*2); ctx.fill();
+                        
+                        if(kills >= 15) {
+                            gameInternalState.active = false;
+                            showSystemMessage("PLAGA ELIMINADA.", "success");
+                            setTimeout(() => { modalStage = "question"; updateModalUI(); }, 1000);
+                        }
+                        return;
+                    }
+                }
+            };
+            canvas.addEventListener('mousedown', clickHandler);
+            canvas.addEventListener('touchstart', (e) => { e.preventDefault(); clickHandler(e); });
+
+            function loop() {
+                if(!gameInternalState.active) return;
+                ctx.clearRect(0,0,canvas.width,canvas.height);
+                frameCount++;
+
+                if(frameCount % spawnRate === 0) {
+                    gameInternalState.spiders.push({ x: Math.random() * (canvas.width - 40) + 20, y: -20, speed: Math.random() * 1.5 + 1 });
+                    if(spawnRate > 20) spawnRate -= 2; 
+                }
+
+                ctx.fillStyle = "#ef4444";
+                gameInternalState.spiders.forEach((s) => {
+                    s.y += s.speed;
+                    // Dibujar araña simple
+                    ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, Math.PI*2); ctx.fill(); 
+                    ctx.moveTo(s.x-10, s.y-5); ctx.lineTo(s.x+10, s.y-5); ctx.stroke();
+                    ctx.moveTo(s.x-10, s.y+5); ctx.lineTo(s.x+10, s.y+5); ctx.stroke();
+                    ctx.moveTo(s.x, s.y-10); ctx.lineTo(s.x, s.y-50); ctx.strokeStyle="rgba(255,255,255,0.2)"; ctx.stroke(); ctx.strokeStyle="#000";
+
+                    if(s.y > canvas.height) {
+                        gameInternalState.active = false;
+                        showSystemMessage("SISTEMA INFECTADO.", "error");
+                        setTimeout(() => renderSpiderDefense(document.getElementById('modal-content')), 1500);
+                    }
+                });
+                gameInternalState.animFrame = requestAnimationFrame(loop);
+            }
+            loop();
+        }
+
+        // ==========================================
+        // === PREGUNTAS ===
+        // ==========================================
+
+        // --- NIVEL 4: FOOD GRID (Actualizado) ---
+        function renderFoodGrid(container) {
+            gameInternalState.selectedFood = [];
+            
+            // Lista de opciones (3 Correctas + Distractores)
+            const options = [
+                { id: "SALCHICHAS", name: "Salchichas", correct: true },
+                { id: "PICA POLLO", name: "Pica Pollo", correct: true },
+                { id: "TOSTADAS FRANCESAS", name: "Tostadas Fran.", correct: true },
+                // Distractores
+                { id: "PIZZA", name: "Pizza", correct: false },
+                { id: "SUSHI", name: "Sushi", correct: false },
+                { id: "PASTA", name: "Pasta", correct: false },
+                { id: "SOPA", name: "Sopa China", correct: false },
+                { id: "HELADO", name: "Helado", correct: false },
+                { id: "HAMBURGUESA", name: "Hamburguesa", correct: false },
+            ].sort(() => Math.random() - 0.5);
+
+            let gridHtml = `<div class="grid grid-cols-3 gap-3 w-full max-w-md mb-6">`;
+            options.forEach(opt => {
+                gridHtml += `<button onclick="toggleFood(this, '${opt.id}')" class="food-item p-2 bg-stone-800 border border-stone-600 rounded-xl text-xs md:text-sm font-bold uppercase text-stone-400 hover:bg-stone-700 flex flex-col items-center justify-center text-center leading-tight shadow-md transition-all active:scale-95">${opt.name}</button>`;
+            });
+            gridHtml += `</div>
+                <button onclick="checkFoodGrid()" class="px-8 py-3 bg-green-800 text-white rounded-lg font-bold uppercase tracking-widest hover:bg-green-700 transition-colors shadow-[0_0_15px_rgba(22,163,74,0.3)]">CONFIRMAR SELECCIÓN</button>
+            `;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col items-center w-full";
+            wrapper.innerHTML = `<p class="text-xs text-stone-500 mb-4 font-mono uppercase tracking-widest">SELECCIONA 3 ELEMENTOS</p>` + gridHtml;
+            container.appendChild(wrapper);
+        }
+
+        function toggleFood(btn, id) {
+            if (gameInternalState.selectedFood.includes(id)) {
+                gameInternalState.selectedFood = gameInternalState.selectedFood.filter(item => item !== id);
+                btn.classList.remove('selected');
+            } else {
+                if(gameInternalState.selectedFood.length < 3) { // Limite 3
+                    gameInternalState.selectedFood.push(id);
+                    btn.classList.add('selected');
+                } else {
+                    btn.classList.add('animate-shake');
+                    setTimeout(() => btn.classList.remove('animate-shake'), 300);
+                }
+            }
+        }
+
+        function checkFoodGrid() {
+            const correctos = activeLevelData.answer.sort().join(',');
+            const seleccionados = gameInternalState.selectedFood.sort().join(',');
+
+            if (correctos === seleccionados) {
+                completeLevelLogic();
+            } else {
+                showSystemMessage("DATOS DE CONSUMO INCORRECTOS.", "error");
+                document.querySelectorAll('.food-item').forEach(b => {
+                    b.classList.remove('selected');
+                    b.classList.add('border-red-500');
+                    setTimeout(()=>b.classList.remove('border-red-500'), 500);
+                });
+                gameInternalState.selectedFood = [];
+            }
+        }
+
+        // --- NIVEL 5: ANIME DRAG ---
+        function renderAnimeDrag(container) {
+            const parts = [
+                { id: 'p1', text: "I Was Reincarnated" },
+                { id: 'p2', text: "as the 7th Prince" },
+                { id: 'p3', text: "so I Can Take My Time" },
+                { id: 'p4', text: "Perfecting My" },
+                { id: 'p5', text: "Magical Ability" },
+                { id: 'trap1', text: "to Become the Demon King" },
+                { id: 'trap2', text: "in Another World" } 
+            ].sort(() => Math.random() - 0.5);
+
+            let html = `<div class="w-full flex flex-col items-center"><div class="text-xs text-stone-500 mb-4 font-mono uppercase">Arrastra para ordenar el título:</div><div id="sort-list" class="sortable-list flex flex-col gap-2 w-full max-w-sm min-h-[300px] p-4 border border-dashed border-stone-800 rounded-xl">`;
+            parts.forEach(p => {
+                html += `<div class="draggable-item bg-stone-800 p-3 rounded border border-stone-700 text-sm font-mono text-center text-stone-300" draggable="true" data-id="${p.id}">${p.text}</div>`;
+            });
+            html += `</div><button onclick="checkAnimeOrder()" class="mt-6 px-8 py-3 bg-green-900/20 border border-green-700/50 text-green-400 rounded-lg uppercase text-xs font-bold tracking-widest">Verificar Sintaxis</button></div>`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = html;
+            container.appendChild(wrapper);
+
+            const list = document.getElementById('sort-list');
+            let draggedItem = null;
+
+            list.addEventListener('dragstart', (e) => { draggedItem = e.target; setTimeout(() => e.target.classList.add('dragging'), 0); });
+            list.addEventListener('dragend', (e) => { setTimeout(() => e.target.classList.remove('dragging'), 0); draggedItem = null; });
+            list.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                const afterElement = getDragAfterElement(list, e.clientY);
+                if (afterElement == null) { list.appendChild(draggedItem); } 
+                else { list.insertBefore(draggedItem, afterElement); }
+            });
+
+            const items = document.querySelectorAll('.draggable-item');
+            let selected = null;
+            items.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (selected === item) { item.classList.remove('border-green-500', 'bg-stone-700'); selected = null; } 
+                    else if (selected) {
+                        const next = item.nextSibling; const parent = item.parentNode;
+                        selected.parentNode.insertBefore(item, selected);
+                        if(next) parent.insertBefore(selected, next); else parent.appendChild(selected);
+                        selected.classList.remove('border-green-500', 'bg-stone-700'); selected = null;
+                    } else { selected = item; item.classList.add('border-green-500', 'bg-stone-700'); }
+                });
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.draggable-item:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) { return { offset: offset, element: child }; } 
+                else { return closest; }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        function checkAnimeOrder() {
+            const list = document.getElementById('sort-list');
+            const items = list.querySelectorAll('.draggable-item');
+            const currentOrder = Array.from(items).map(i => i.getAttribute('data-id'));
+            const correctOrder = ['p1', 'p2', 'p3', 'p4', 'p5'];
+            let isCorrect = true;
+            if (currentOrder.length < 5) isCorrect = false;
+            for(let i=0; i<5; i++) { if(currentOrder[i] !== correctOrder[i]) isCorrect = false; }
+            if (isCorrect) completeLevelLogic();
+            else { showSystemMessage("ERROR DE SINTAXIS.", "error"); list.classList.add('animate-shake'); setTimeout(() => list.classList.remove('animate-shake'), 500); }
+        }
+
+        // --- NIVEL 1-3 JUEGOS ORIGINALES (Mantenidos) ---
         function renderTTT(container) {
             tttAttempts++; localStorage.setItem('maria_ttt_attempts', tttAttempts);
             gameInternalState.board = Array(9).fill(null); gameInternalState.turn = true; gameInternalState.active = true;
             let html = '<div class="grid grid-cols-3 gap-5 mb-8">';
             for(let i=0; i<9; i++) html += `<button onclick="handleTTT(${i})" id="ttt-${i}" class="w-24 h-24 rounded-3xl bg-stone-800/50 border border-stone-700 text-5xl font-bold text-stone-500 transition-all"></button>`;
-            html += `</div><div class="flex flex-col items-center gap-4">`;
-            html += `<div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center">Intento #${tttAttempts}</div></div>`;
-            container.innerHTML = html;
+            html += `</div><div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center">Intento #${tttAttempts}</div>`;
+            const wrapper = document.createElement('div'); wrapper.className = "flex flex-col items-center"; wrapper.innerHTML = html; container.appendChild(wrapper);
         }
         function handleTTT(idx) { if (!gameInternalState.active || gameInternalState.board[idx] || !gameInternalState.turn) return; gameInternalState.board[idx] = 'X'; updateTTTBoard(); if (checkWinTTT('X')) return finishTTT('V'); if (!gameInternalState.board.includes(null)) return finishTTT('E'); gameInternalState.turn = false; setTimeout(aiMove, 600); }
-        function aiMove() {
-            if (!gameInternalState.active) return; const move = minimaxTTT(gameInternalState.board, 'O').index;
-            gameInternalState.board[move] = 'O'; updateTTTBoard(); if (checkWinTTT('O')) return finishTTT('F'); if (!gameInternalState.board.includes(null)) return finishTTT('E'); gameInternalState.turn = true;
-        }
-        function finishTTT(type) { gameInternalState.active = false; if (type === 'V') { modalStage = "question"; updateModalUI(); } else { showSystemMessage(type === 'F' ? "KAIROS GANÓ. REINICIANDO..." : "EMPATE. REINTENTA.", "info"); setTimeout(() => renderTTT(document.getElementById('modal-content')), 1000); } }
-        function updateTTTBoard() { gameInternalState.board.forEach((v,i) => { const b = document.getElementById(`ttt-${i}`); if(b) { b.innerText = v || ''; if(v === 'X') b.className = "w-24 h-24 rounded-3xl bg-green-900/20 border border-green-600 text-5xl font-bold text-green-400"; if(v === 'O') b.className = "w-24 h-24 rounded-3xl bg-stone-800 border border-stone-600 text-5xl font-bold text-white"; } }); }
+        function aiMove() { if (!gameInternalState.active) return; const move = minimaxTTT(gameInternalState.board, 'O').index; gameInternalState.board[move] = 'O'; updateTTTBoard(); if (checkWinTTT('O')) return finishTTT('F'); if (!gameInternalState.board.includes(null)) return finishTTT('E'); gameInternalState.turn = true; }
+        function finishTTT(type) { gameInternalState.active = false; if (type === 'V') { modalStage = "question"; updateModalUI(); } else { showSystemMessage(type === 'F' ? "KAIROS GANÓ." : "EMPATE.", "info"); setTimeout(() => updateModalUI(), 1000); } }
+        function updateTTTBoard() { gameInternalState.board.forEach((v,i) => { const b = document.getElementById(`ttt-${i}`); if(b) { b.innerText = v || ''; if(v === 'X') b.className = "w-24 h-24 rounded-3xl bg-green-900/20 border border-green-600 text-green-400"; if(v === 'O') b.className = "w-24 h-24 rounded-3xl bg-stone-800 border border-stone-600 text-white"; } }); }
         function checkWinTTT(p) { const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]]; return wins.some(l => l.every(i => gameInternalState.board[i] === p)); }
-        function minimaxTTT(board, p) {
-            const avail = board.map((v,i) => v===null?i:null).filter(v=>v!==null); if (checkWinTTT('X')) return {score:-10}; if (checkWinTTT('O')) return {score:10}; if (avail.length === 0) return {score:0};
-            const moves = []; for (let i=0; i<avail.length; i++) { const m = {index: avail[i]}; board[avail[i]] = p; m.score = minimaxTTT(board, p==='O'?'X':'O').score; board[avail[i]] = null; moves.push(m); }
-            return moves.reduce((a, b) => (p==='O' ? (b.score > a.score) : (b.score < a.score)) ? b : a);
-        }
+        function minimaxTTT(board, p) { const avail = board.map((v,i) => v===null?i:null).filter(v=>v!==null); if (checkWinTTT('X')) return {score:-10}; if (checkWinTTT('O')) return {score:10}; if (avail.length === 0) return {score:0}; const moves = []; for (let i=0; i<avail.length; i++) { const m = {index: avail[i]}; board[avail[i]] = p; m.score = minimaxTTT(board, p==='O'?'X':'O').score; board[avail[i]] = null; moves.push(m); } return moves.reduce((a, b) => (p==='O' ? (b.score > a.score) : (b.score < a.score)) ? b : a); }
 
-        // --- NIVEL 2: LIGHTS OUT ---
         function renderLightsOut(container) {
             const size = 5; gameInternalState.active = true; gameInternalState.lights = Array(size * size).fill(false);
             for(let i=0; i<15; i++) toggleMechanism(Math.floor(Math.random()*25), 5);
             let html = '<div class="grid grid-cols-5 gap-3 mb-8">';
             for(let i=0; i<25; i++) html += `<button onclick="handleLightClick(${i})" id="light-${i}" class="w-14 h-14 rounded-xl border light-btn ${gameInternalState.lights[i] ? 'light-on' : 'light-off'}"></button>`;
-            html += '</div>';
-            container.innerHTML = html;
+            html += '</div>'; const wrapper = document.createElement('div'); wrapper.innerHTML = html; container.appendChild(wrapper);
         }
         function handleLightClick(idx) { if (!gameInternalState.active) return; toggleMechanism(idx, 5); updateLightsUI(); if (gameInternalState.lights.every(l => !l)) { gameInternalState.active = false; showSystemMessage("DEFENSA DESACTIVADA.", "success"); modalStage = "question"; setTimeout(updateModalUI, 1000); } }
         function toggleMechanism(idx, size) { const r = Math.floor(idx/size), c = idx%size; const ts = [[r,c],[r-1,c],[r+1,c],[r,c-1],[r,c+1]]; ts.forEach(([ro, co]) => { if (ro>=0 && ro<size && co>=0 && co<size) gameInternalState.lights[ro*size+co] = !gameInternalState.lights[ro*size+co]; }); }
         function updateLightsUI() { gameInternalState.lights.forEach((isOn, i) => { const b = document.getElementById(`light-${i}`); if(b) b.className = `w-14 h-14 rounded-xl border light-btn ${isOn ? 'light-on' : 'light-off'}`; }); }
 
-        // --- NIVEL 3: MEMORY MATCH (NUEVO) ---
         function renderMemoryMatch(container) {
-            // Iconos solicitados: Pizza, Vino, Amigos (users), Piscina (waves), Camas (bed-double)
-            const iconSet = ['pizza', 'wine', 'users', 'waves', 'bed-double'];
-            // 2 calaveras trampas
-            const traps = ['skull', 'skull'];
-            
-            // Crear mazo: pares de iconos + trampas
-            let deck = [...iconSet, ...iconSet, ...traps];
-            // Barajar
-            deck.sort(() => Math.random() - 0.5);
-
-            gameInternalState = {
-                deck: deck,
-                flipped: [], // Indices de cartas volteadas actualmente
-                matched: [], // Indices de cartas ya emparejadas
-                locked: false, // Bloqueo mientras se verifican pares
-                active: true,
-                timeouts: []
-            };
-
+            const iconSet = ['pizza', 'wine', 'users', 'waves', 'bed-double']; const traps = ['skull', 'skull'];
+            let deck = [...iconSet, ...iconSet, ...traps].sort(() => Math.random() - 0.5);
+            gameInternalState = { ...gameInternalState, deck: deck, flipped: [], matched: [], locked: false, active: true };
             let gridHtml = '<div class="grid grid-cols-4 gap-4 mb-4">';
-            deck.forEach((iconName, idx) => {
-                gridHtml += `
-                    <div class="memory-card w-16 h-16 md:w-20 md:h-20" onclick="handleMatchClick(${idx})" id="card-${idx}">
-                        <div class="memory-card-inner">
-                            <div class="memory-card-front text-stone-600 font-bold text-xl font-mono">?</div>
-                            <div class="memory-card-back ${iconName === 'skull' ? 'bg-red-900/50 border-red-500 text-red-500' : ''}">
-                                <i data-lucide="${iconName}" class="w-8 h-8"></i>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            gridHtml += '</div>';
-            
-            container.innerHTML = `
-                <div class="flex flex-col items-center">
-                    ${gridHtml}
-                    <div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center mt-4">
-                        <span id="match-status">ENCUENTRA LOS PARES</span>
-                    </div>
-                </div>
-            `;
-            lucide.createIcons();
+            deck.forEach((iconName, idx) => { gridHtml += `<div class="memory-card w-16 h-16 md:w-20 md:h-20" onclick="handleMatchClick(${idx})" id="card-${idx}"><div class="memory-card-inner"><div class="memory-card-front text-stone-600 font-bold text-xl font-mono">?</div><div class="memory-card-back ${iconName === 'skull' ? 'bg-red-900/50 border-red-500 text-red-500' : ''}"><i data-lucide="${iconName}" class="w-8 h-8"></i></div></div></div>`; });
+            gridHtml += '</div><div class="text-xs font-mono text-stone-500 uppercase tracking-widest text-center mt-4">ENCUENTRA LOS PARES</div>';
+            const wrapper = document.createElement('div'); wrapper.className = "flex flex-col items-center"; wrapper.innerHTML = gridHtml; container.appendChild(wrapper);
         }
-
         function handleMatchClick(idx) {
-            if (!gameInternalState.active || gameInternalState.locked) return;
-            if (gameInternalState.flipped.includes(idx) || gameInternalState.matched.includes(idx)) return;
-
-            // Voltear carta visualmente
-            const card = document.getElementById(`card-${idx}`);
-            card.classList.add('flipped');
-            gameInternalState.flipped.push(idx);
-
+            if (!gameInternalState.active || gameInternalState.locked || gameInternalState.flipped.includes(idx) || gameInternalState.matched.includes(idx)) return;
+            const card = document.getElementById(`card-${idx}`); card.classList.add('flipped'); gameInternalState.flipped.push(idx);
             const iconName = gameInternalState.deck[idx];
-
-            // 1. Verificar si es TRAMPA (Calavera)
-            if (iconName === 'skull') {
-                gameInternalState.locked = true;
-                showSystemMessage("AMENAZA DETECTADA: CALAVERA", "error");
-                
-                // Efecto de sacudida en toda la pantalla
-                document.body.classList.add('animate-shake');
-                const status = document.getElementById('match-status');
-                if(status) {
-                    status.innerText = "¡ERROR CRÍTICO! REINICIANDO...";
-                    status.className = "text-xs font-mono text-red-500 font-bold uppercase tracking-widest animate-pulse";
-                }
-
-                setTimeout(() => {
-                    document.body.classList.remove('animate-shake');
-                    // Reiniciar el juego
-                    renderMemoryMatch(document.getElementById('modal-content'));
-                }, 1200);
-                return;
-            }
-
-            // 2. Verificar par si hay 2 cartas volteadas
+            if (iconName === 'skull') { gameInternalState.locked = true; showSystemMessage("CALAVERA DETECTADA.", "error"); setTimeout(() => { updateModalUI(); }, 1200); return; }
             if (gameInternalState.flipped.length === 2) {
-                gameInternalState.locked = true;
-                const idx1 = gameInternalState.flipped[0];
-                const idx2 = gameInternalState.flipped[1];
-                const icon1 = gameInternalState.deck[idx1];
-                const icon2 = gameInternalState.deck[idx2];
-
-                if (icon1 === icon2) {
-                    // COINCIDENCIA
-                    gameInternalState.matched.push(idx1, idx2);
-                    gameInternalState.flipped = [];
-                    gameInternalState.locked = false;
-                    
-                    document.getElementById(`card-${idx1}`).classList.add('matched');
-                    document.getElementById(`card-${idx2}`).classList.add('matched');
-
-                    // Verificar victoria (10 cartas matched, excluyendo las 2 calaveras)
-                    if (gameInternalState.matched.length === 10) {
-                         gameInternalState.active = false;
-                         showSystemMessage("ENLACE NEURAL ESTABLECIDO.", "success");
-                         setTimeout(() => { modalStage = "question"; updateModalUI(); }, 1000);
-                    }
-                } else {
-                    // NO COINCIDENCIA
-                    setTimeout(() => {
-                        document.getElementById(`card-${idx1}`).classList.remove('flipped');
-                        document.getElementById(`card-${idx2}`).classList.remove('flipped');
-                        gameInternalState.flipped = [];
-                        gameInternalState.locked = false;
-                    }, 1000);
-                }
+                gameInternalState.locked = true; const [idx1, idx2] = gameInternalState.flipped;
+                if (gameInternalState.deck[idx1] === gameInternalState.deck[idx2]) {
+                    gameInternalState.matched.push(idx1, idx2); gameInternalState.flipped = []; gameInternalState.locked = false;
+                    document.getElementById(`card-${idx1}`).classList.add('matched'); document.getElementById(`card-${idx2}`).classList.add('matched');
+                    if (gameInternalState.matched.length === 10) { gameInternalState.active = false; showSystemMessage("ENLACE ESTABLECIDO.", "success"); setTimeout(() => { modalStage = "question"; updateModalUI(); }, 1000); }
+                } else { setTimeout(() => { document.getElementById(`card-${idx1}`).classList.remove('flipped'); document.getElementById(`card-${idx2}`).classList.remove('flipped'); gameInternalState.flipped = []; gameInternalState.locked = false; }, 1000); }
             }
         }
 
-        // --- PREGUNTA: SUM MATRIX ---
-        function renderSumMatrix(container) {
-            gameInternalState = {
-                currentSum: 0,
-                selectedValues: []
-            };
-            
-            // Opciones para sumar 19: e.g. 10 + 5 + 2 + 2
-            const options = [10, 5, 8, 4, 3, 2, 2, 1, 7, 6, 12, 9];
-            // Shuffle
-            options.sort(() => Math.random() - 0.5);
-            
-            let gridHtml = '<div class="grid grid-cols-4 gap-4 mb-8">';
-            options.forEach((val, idx) => {
-                gridHtml += `<button onclick="toggleMatrixNum(this, ${val})" class="matrix-btn w-16 h-16 rounded-xl border border-stone-700 bg-stone-900 text-stone-500 font-mono text-xl font-bold hover:border-green-500/50 transition-all">${val}</button>`;
-            });
-            gridHtml += '</div>';
-            
-            container.innerHTML = `
-                <div class="flex flex-col items-center">
-                    <div class="mb-8 text-center">
-                        <div class="text-xs text-stone-500 uppercase tracking-widest mb-2">Desplazamiento Actual</div>
-                        <div id="matrix-sum" class="text-6xl font-mono text-stone-300 font-light">00</div>
-                        <div class="text-xs text-green-700 mt-2 font-mono">OBJETIVO: Sincronizar Delta</div>
-                    </div>
-                    ${gridHtml}
-                    <button onclick="checkMatrixSum()" class="mt-4 px-10 py-3 bg-green-900/20 border border-green-800 text-green-400 rounded-lg uppercase tracking-widest text-sm font-bold hover:bg-green-900/40">
-                        SINCRONIZAR
-                    </button>
-                </div>
-            `;
-        }
-        
-        function toggleMatrixNum(btn, val) {
-            if (btn.classList.contains('bg-green-600')) {
-                // Deselect
-                btn.classList.remove('bg-green-600', 'text-black', 'border-green-400');
-                btn.classList.add('bg-stone-900', 'text-stone-500', 'border-stone-700');
-                gameInternalState.currentSum -= val;
-            } else {
-                // Select
-                btn.classList.remove('bg-stone-900', 'text-stone-500', 'border-stone-700');
-                btn.classList.add('bg-green-600', 'text-black', 'border-green-400');
-                gameInternalState.currentSum += val;
-            }
-            document.getElementById('matrix-sum').innerText = gameInternalState.currentSum.toString().padStart(2, '0');
-        }
-        
-        function checkMatrixSum() {
-            if (gameInternalState.currentSum.toString() === activeLevelData.answer) {
-                completeLevelLogic();
-            } else {
-                showSystemMessage(`ERROR DE PARALAJE: ${gameInternalState.currentSum} != OBJ`, "error");
-                // Reset visual simple
-                document.getElementById('matrix-sum').classList.add('text-red-500');
-                setTimeout(() => document.getElementById('matrix-sum').classList.remove('text-red-500'), 500);
-            }
-        }
-
-        // --- DIAL ---
-        function renderDial(container) {
-            gameInternalState.inputValue = "0";
-            container.innerHTML = `
-                <div class="w-full max-w-[400px] space-y-12 animate-in fade-in flex flex-col items-center">
-                    <div id="dial-value" class="text-8xl font-extralight text-stone-300 font-mono tracking-tighter">0</div>
-                    <div class="w-full px-4">
-                        <input type="range" id="tension-slider" min="0" max="30" value="0" step="1" 
-                            oninput="updateDialVisual(this.value)" 
-                            class="w-full">
-                    </div>
-                    <button onclick="checkDialAnswer()" 
-                        class="px-12 py-4 bg-green-900/10 border border-green-700/30 text-green-400 rounded-2xl uppercase font-bold tracking-widest hover:bg-green-800/20 transition-all">
-                        ESTABLECER VALOR
-                    </button>
-                    <p class="text-[10px] text-stone-600 font-mono uppercase tracking-widest text-center">Protocolo de ajuste de intensidad</p>
-                </div>
-            `;
-        }
-        function updateDialVisual(val) {
-            gameInternalState.inputValue = val; 
-            const display = document.getElementById('dial-value'); 
-            display.innerText = val;
-            display.className = "text-8xl font-extralight text-stone-300 font-mono tracking-tighter";
-        }
-        function checkDialAnswer() {
-            if (gameInternalState.inputValue === activeLevelData.answer) {
-                completeLevelLogic();
-            } else {
-                showSystemMessage("VALOR INCORRECTO. SIGUE INTENTANDO.", "error");
-                document.getElementById('modal-overlay').classList.add('animate-shake');
-                setTimeout(() => document.getElementById('modal-overlay').classList.remove('animate-shake'), 300);
-            }
-        }
-
-        // --- PAD NUMÉRICO ---
         function renderPad(container) {
             gameInternalState.input = "";
-            container.innerHTML = `<div id="pad-disp" class="w-80 bg-black p-8 mb-8 text-center font-mono text-4xl border border-green-900/40 rounded-3xl text-green-100 tracking-widest font-bold">...</div><div id="pad-grid" class="grid grid-cols-3 gap-5 w-80"></div><div class="flex gap-4 w-80 mt-8"><button onclick="updPad('C')" class="flex-1 p-5 bg-stone-800 text-stone-500 rounded-2xl text-xs font-bold uppercase">Borrar</button><button onclick="checkAns()" class="flex-1 p-5 bg-green-800 text-white rounded-2xl text-sm font-bold uppercase">Confirmar</button></div>`;
-            renderButtons();
+            const wrapper = document.createElement('div'); wrapper.className = "flex flex-col items-center";
+            wrapper.innerHTML = `<div id="pad-disp" class="w-80 bg-black p-8 mb-8 text-center font-mono text-4xl border border-green-900/40 rounded-3xl text-green-100 tracking-widest font-bold">...</div><div id="pad-grid" class="grid grid-cols-3 gap-5 w-80"></div><div class="flex gap-4 w-80 mt-8"><button onclick="updPad('C')" class="flex-1 p-5 bg-stone-800 text-stone-500 rounded-2xl text-xs font-bold uppercase">Borrar</button><button onclick="checkAns()" class="flex-1 p-5 bg-green-800 text-white rounded-2xl text-sm font-bold uppercase">Confirmar</button></div>`;
+            container.appendChild(wrapper); renderButtons();
         }
-        function renderButtons() {
-            const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random()-0.5);
-            const grid = document.getElementById('pad-grid'); if (grid) grid.innerHTML = nums.map(n => `<button onclick="updPad(${n})" class="p-6 bg-stone-800 border border-stone-700 rounded-2xl font-mono text-white text-2xl">${n}</button>`).join('');
-        }
+        function renderButtons() { const nums = [1,2,3,4,5,6,7,8,9,0].sort(() => Math.random()-0.5); const grid = document.getElementById('pad-grid'); if (grid) grid.innerHTML = nums.map(n => `<button onclick="updPad(${n})" class="p-6 bg-stone-800 border border-stone-700 rounded-2xl font-mono text-white text-2xl">${n}</button>`).join(''); }
         function updPad(v) { if (v==='C') gameInternalState.input = ""; else if (gameInternalState.input.length < 8) gameInternalState.input += v; const disp = document.getElementById('pad-disp'); if (disp) disp.innerText = gameInternalState.input || "..."; if(v!=='C') renderButtons(); }
-        function checkAns() {
-            if (gameInternalState.input === activeLevelData.answer) {
-                completeLevelLogic();
-            } else { showSystemMessage("CLAVE ERRÓNEA.", "error"); updPad('C'); }
-        }
+        function checkAns() { if (gameInternalState.input === activeLevelData.answer) completeLevelLogic(); else { showSystemMessage("CLAVE ERRÓNEA.", "error"); updPad('C'); } }
 
-        // Lógica unificada de completado
+        function renderSumMatrix(container) {
+            gameInternalState = { ...gameInternalState, currentSum: 0 };
+            const options = [10, 5, 8, 4, 3, 2, 2, 1, 7, 6, 12, 9].sort(() => Math.random() - 0.5);
+            let gridHtml = '<div class="grid grid-cols-4 gap-4 mb-8">';
+            options.forEach((val, idx) => { gridHtml += `<button onclick="toggleMatrixNum(this, ${val})" class="matrix-btn w-16 h-16 rounded-xl border border-stone-700 bg-stone-900 text-stone-500 font-mono text-xl font-bold hover:border-green-500/50 transition-all">${val}</button>`; });
+            gridHtml += '</div>'; const wrapper = document.createElement('div'); wrapper.className = "flex flex-col items-center";
+            wrapper.innerHTML = `<div class="mb-8 text-center"><div class="text-xs text-stone-500 uppercase tracking-widest mb-2">Desplazamiento Actual</div><div id="matrix-sum" class="text-6xl font-mono text-stone-300 font-light">00</div></div>${gridHtml}<button onclick="checkMatrixSum()" class="mt-4 px-10 py-3 bg-green-900/20 border border-green-800 text-green-400 rounded-lg uppercase tracking-widest text-sm font-bold hover:bg-green-900/40">SINCRONIZAR</button>`;
+            container.appendChild(wrapper);
+        }
+        function toggleMatrixNum(btn, val) { if (btn.classList.contains('bg-green-600')) { btn.classList.remove('bg-green-600', 'text-black', 'border-green-400'); btn.classList.add('bg-stone-900', 'text-stone-500', 'border-stone-700'); gameInternalState.currentSum -= val; } else { btn.classList.remove('bg-stone-900', 'text-stone-500', 'border-stone-700'); btn.classList.add('bg-green-600', 'text-black', 'border-green-400'); gameInternalState.currentSum += val; } document.getElementById('matrix-sum').innerText = gameInternalState.currentSum.toString().padStart(2, '0'); }
+        function checkMatrixSum() { if (gameInternalState.currentSum.toString() === activeLevelData.answer) completeLevelLogic(); else { showSystemMessage(`ERROR PARALAJE.`, "error"); } }
+
+        function renderDial(container) {
+            gameInternalState.inputValue = "0"; const wrapper = document.createElement('div'); wrapper.className = "flex flex-col items-center";
+            wrapper.innerHTML = `<div class="w-full max-w-[400px] space-y-12 animate-in fade-in flex flex-col items-center"><div id="dial-value" class="text-8xl font-extralight text-stone-300 font-mono tracking-tighter">0</div><div class="w-full px-4"><input type="range" id="tension-slider" min="0" max="30" value="0" step="1" oninput="updateDialVisual(this.value)" class="w-full"></div><button onclick="checkDialAnswer()" class="px-12 py-4 bg-green-900/10 border border-green-700/30 text-green-400 rounded-2xl uppercase font-bold tracking-widest hover:bg-green-800/20 transition-all">ESTABLECER VALOR</button></div>`;
+            container.appendChild(wrapper);
+        }
+        function updateDialVisual(val) { gameInternalState.inputValue = val; document.getElementById('dial-value').innerText = val; }
+        function checkDialAnswer() { if (gameInternalState.inputValue === activeLevelData.answer) completeLevelLogic(); else { showSystemMessage("VALOR INCORRECTO.", "error"); } }
+
+        // --- LÓGICA FINAL ---
         function completeLevelLogic() {
             if (!completedLevels.includes(activeLevelData.id)) {
                 completedLevels.push(activeLevelData.id);
-                // GUARDAR EL TIMESTAMP DEL MOMENTO DE COMPLETADO
                 levelTimestamps[activeLevelData.id] = new Date().getTime();
             }
-            saveToLocal(true); closeModal(); renderGrid();
+            saveToLocal(); closeModal(); renderGrid();
             showSystemMessage("ACCESO CONCEDIDO.", "success");
             setTimeout(showStory, 500);
         }
@@ -838,7 +969,11 @@
             }
             type();
         }
-        function closeStory() { document.getElementById('story-screen').classList.add('hidden'); document.getElementById('main-layout').classList.remove('hidden'); document.getElementById('bg-effects').classList.remove('hidden'); }
+        function closeStory() { 
+            document.getElementById('story-screen').classList.add('hidden'); 
+            document.getElementById('main-layout').classList.remove('hidden'); 
+            document.getElementById('bg-effects').classList.remove('hidden'); 
+        }
     </script>
 </body>
 </html>
