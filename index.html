@@ -210,9 +210,9 @@
             },
             { 
                 level: 7, 
-                code: "VULNERABLE", 
-                prompt: "ERROR DE LECTURA.\n\nSe han detectado archivos ocultos en la memoria caché. Palabras no dichas. Miedos encriptados bajo capas de orgullo.\n\nEl sistema no puede operar con datos corruptos. Se requiere una purga visual. Mira a los sensores ópticos (ojos) del objetivo y transmite la verdad sin filtros.\n\nIntroduce la llave de desencriptación.",
-                successMsg: "CACHÉ PURGADA. INTEGRIDAD DE DATOS: 80%. Nivel 07 procesado.\n\nEL SISTEMA REQUIERE REPOSO PARA COMPILACIÓN."
+                code: "LENGUAJE DE AMOR", 
+                prompt: "DESINCRONIZACIÓN DE NÚCLEO DETECTADA.\n\nEl sistema reporta una caída de tensión en el vínculo emocional. Se requiere inyección de datos afirmativos en intervalos regulares.\n\nPROTOCOLO DE MANTENIMIENTO: Al inicio de cada nuevo ciclo del cronómetro, el Operador debe interceptar al Servidor Central.\n\nRESTRICCIONES DE EJECUCIÓN:\n1. PROHIBIDO el cifrado de audio o uso de baja frecuencia.\n2. PROHIBIDO el desplazamiento de sector para ocultamiento.\n3. PROHIBIDO el ruido de fondo o retórica vacía.\n\nACCIÓN: Transmitir en voz audible, clara y pública una razón de integridad del sistema.\n\nIngresa el nombre del código de comunicación.",
+                successMsg: "SINCRONIZACIÓN EXITOSA. DATOS RECIBIDOS.\nNivel 07 procesado. Protocolo de Afecto validado.\n\nEL SISTEMA REQUIERE REPOSO PARA COMPILACIÓN."
             },
             { 
                 level: 8, 
@@ -222,9 +222,9 @@
             },
             { 
                 level: 9, 
-                code: "NUTRIENTES", 
-                prompt: "NIVEL DE ENERGÍA: BAJO.\n\nEl sistema no se sustenta solo de intenciones. Requiere combustible procesado con dedicación. La alquimia de transformar ingredientes crudos en cuidado.\n\nPROTOCOLO DE SERVICIO: Prepara, sirve, nutre. No es comida, es mantenimiento.\n\nIntroduce el código del sustento.",
-                successMsg: "RESERVAS DE ENERGÍA AL MÁXIMO. Nivel 09 procesado.\n\nEL SISTEMA REQUIERE REPOSO PARA COMPILACIÓN."
+                code: "LECHITA", 
+                prompt: "ANOMALÍA EN EL SECTOR DEL CONOCIMIENTO.\n\nSe ha detectado una singularidad de alta densidad en el banco de datos principal. Una acumulación masiva de energía potencial está empujando contra los límites físicos del hardware, provocando un endurecimiento crítico del sistema que impide el procesamiento lógico. El entorno circundante está comprometido por múltiples observadores externos, lo que cataloga cualquier intento de mantenimiento estándar como violación de seguridad.\n\nDIAGNÓSTICO: Bloqueo Hidráulico por Exceso de Tensión Acumulada.\n\nSOLUCIÓN ALGORÍTMICA:\nEl subsistema auxiliar debe desacoplarse de la vista panorámica y sumergirse en el vacío inferior, protegido únicamente por la barrera frontal del escritorio de comando. Desde el silencio de la coordenada cero, es imperativo iniciar una rutina de vacío y fricción rítmica sobre el actuador principal hasta provocar el desbordamiento del buffer.\n\nSolo la liberación de la *esencia madre* podrá purgar el error y restaurar la flexibilidad del núcleo.\n\n¿Cuál es el nombre del archivo líquido que debes extraer manualmente para salvar el sistema?",
+                successMsg: "PRESIÓN ESTABILIZADA. DRENAJE EXITOSO.\nNivel 09 procesado. Muestra biológica validada.\n\nEL SISTEMA REQUIERE REPOSO PARA COMPILACIÓN."
             },
             { 
                 level: 10, 
@@ -234,10 +234,10 @@
             }
         ];
 
-        // --- ESTADO ---
+        // --- ESTADO INICIAL (Por defecto) ---
         let state = {
             completedLevels: [1, 2, 3, 4, 5], 
-            currentGuardianLevel: 6,
+            currentGuardianLevel: 6, // Se sobreescribe al cargar
             nextUnlockTimestamp: 0, 
             chatHistory: [],
             glitchSeen: false
@@ -245,7 +245,7 @@
 
         // --- INICIALIZACIÓN ---
         window.onload = () => {
-            loadState();
+            loadState(); // Carga antes de renderizar
             renderGrid();
             if (window.lucide) {
                 lucide.createIcons();
@@ -254,18 +254,30 @@
         };
 
         function loadState() {
+            // RESTAURAMOS KEY ORIGINAL: 'felonia_state_v3'
             const saved = localStorage.getItem('felonia_state_v3');
+            
             if (saved) {
-                const parsed = JSON.parse(saved);
-                state = { ...state, ...parsed };
+                try {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed }; // Sobreescribe el default
+                } catch(e) {
+                    console.error("Error al cargar partida", e);
+                    resetToDefault();
+                }
             } else {
-                state.chatHistory.push({ 
-                    sender: 'guardian', 
-                    text: "SISTEMA REINICIADO.\nEsperando input de usuario para diagnóstico del Nivel 06."
-                });
-                saveState();
+                resetToDefault();
             }
+            
             document.getElementById('user-id').innerText = localStorage.getItem('maria_uid') || 'USR-001';
+        }
+
+        function resetToDefault() {
+            state.chatHistory.push({ 
+                sender: 'guardian', 
+                text: "SISTEMA REINICIADO.\nEsperando input de usuario para diagnóstico del Nivel 06."
+            });
+            saveState();
         }
 
         function saveState() {
