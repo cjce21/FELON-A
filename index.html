@@ -57,7 +57,7 @@
             background: linear-gradient(-90deg, rgba(34,197,94,0.05), transparent);
         }
 
-        /* Grid Cards - Nuevo Estilo Crítico */
+        /* Grid Cards */
         .level-card {
             transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
             background: rgba(10, 10, 10, 0.6);
@@ -79,29 +79,82 @@
         .locked { opacity: 0.4; filter: grayscale(1); cursor: not-allowed; }
         .time-locked { cursor: wait; }
         
-        /* Modal Historia Lineal */
+        /* Modal Historia */
         .story-modal {
             background: rgba(5, 5, 5, 0.95);
             backdrop-filter: blur(20px);
         }
 
-        .cursor-blink::after { content: '_'; animation: blink 1s step-end infinite; }
-        @keyframes blink { 50% { opacity: 0; } }
+        /* Ending Screen Styles */
+        #ending-ui {
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
+            animation: fadeInLong 2s ease-in-out forwards;
+        }
+        @keyframes fadeInLong { 0% { opacity: 0; } 100% { opacity: 1; } }
+
+        .typewriter p {
+            overflow: hidden; 
+            white-space: pre-wrap;
+            margin-bottom: 1em;
+            opacity: 0;
+            animation: typeLine 1s forwards;
+        }
+        @keyframes typeLine { to { opacity: 1; } }
+
+        .hex-glitch {
+            text-shadow: 2px 0 #ef4444, -2px 0 #22c55e;
+            animation: glitch-text 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-text {
+            0% { transform: skew(0deg); }
+            20% { transform: skew(-2deg); }
+            40% { transform: skew(2deg); }
+            60% { transform: skew(0deg); }
+            80% { transform: skew(1deg); }
+            100% { transform: skew(0deg); }
+        }
 
     </style>
 </head>
 <body class="flicker">
     <div class="scanline"></div>
     <div class="noise"></div>
+    
+    <!-- PANTALLA FINAL (SINGULARIDAD) -->
+    <div id="ending-ui" class="hidden fixed inset-0 z-[100] flex flex-col items-center justify-center p-8 text-center select-none cursor-default">
+        <div class="max-w-4xl w-full border border-green-900/30 bg-black/80 p-8 md:p-12 relative overflow-hidden backdrop-blur-xl rounded-sm">
+            <!-- Marco decorativo -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
+            <div class="absolute bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-green-500 to-transparent opacity-50"></div>
+            
+            <i data-lucide="infinity" class="w-16 h-16 text-green-500 mx-auto mb-8 animate-pulse"></i>
 
-    <!-- PANTALLA GUARDIÁN (Nivel 6+) -->
+            <div id="ending-text" class="space-y-6 text-left font-mono text-sm md:text-base text-green-100/90 leading-relaxed tracking-wide mb-12 border-l-2 border-green-800/50 pl-6">
+                <!-- Texto inyectado por JS -->
+            </div>
+
+            <div class="mt-16 pt-8 border-t border-green-900/30 flex flex-col items-center gap-4 animate-pulse">
+                <span class="text-[10px] text-green-600 tracking-[0.5em] uppercase">SYSTEM_TIMESTAMP::HEX_ENCRYPTED</span>
+                <h1 class="text-xl md:text-2xl font-bold text-green-400 font-mono tracking-widest hex-glitch text-center break-all leading-relaxed max-w-3xl">
+                    56 69 65 72 6E 65 73 20 31 30 20 64 65 20 41 62 72 69 6C 20 64 65 6C 20 32 30 32 36
+                </h1>
+            </div>
+
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-green-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute -left-10 -top-10 w-40 h-40 bg-red-500/5 rounded-full blur-3xl"></div>
+        </div>
+    </div>
+
+    <!-- PANTALLA GUARDIÁN (Nivel 6-10) -->
     <div id="guardian-ui" class="hidden fixed inset-0 z-40 bg-black flex flex-col font-mono">
         <div class="p-4 border-b border-red-900/30 flex justify-between items-center bg-red-950/10">
             <div class="flex items-center gap-2">
                 <div class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
-                <span class="text-red-500 text-xs tracking-widest uppercase">CONEXIÓN INESTABLE // MODO SEGURO</span>
+                <span class="text-red-500 text-xs tracking-widest uppercase">CONEXIÓN ESTABLECIDA // MODO SEGURO</span>
             </div>
-            <button onclick="exitGuardian()" class="text-stone-500 hover:text-white text-xs">[SALIR]</button>
+            <div class="flex gap-4">
+                <button onclick="exitGuardian()" class="text-stone-500 hover:text-white text-xs">[ABORTAR]</button>
+            </div>
         </div>
         
         <div id="chat-history" class="flex-1 overflow-y-auto p-6 flex flex-col scrollbar-hide">
@@ -139,7 +192,7 @@
                     <h1 class="text-xl md:text-2xl font-bold tracking-[0.3em] uppercase text-white leading-none">Proyecto Felonía</h1>
                     <div class="flex items-center gap-2 mt-1">
                         <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        <p class="text-[9px] text-green-600/80 uppercase tracking-widest">ID: <span id="user-id">USR-001</span> // ACTIVO</p>
+                        <p class="text-[9px] text-green-600/80 uppercase tracking-widest">ESTADO: <span class="text-green-500">EN LÍNEA</span></p>
                     </div>
                 </div>
             </div>
@@ -228,24 +281,65 @@
             },
             { 
                 level: 10, 
-                code: "NOSOTROS", 
-                prompt: "CÁLCULO DE PROYECCIÓN FUTURA.\n\nLas variables individuales son inestables. La única configuración sostenible a largo plazo es la unificación de la arquitectura.\n\nPROTOCOLO FINAL: Define la Singularidad. ¿Qué somos cuando nadie mira? ¿Qué seremos cuando el código se borre?\n\nIntroduce la llave maestra.",
-                successMsg: "SISTEMA ACTUALIZADO. VERSIÓN: ETERNIDAD. Ejecución completa."
+                code: "COGER", 
+                prompt: "PROTOCOLO DE ACOPLAMIENTO SUPERIOR.\n\nEl hardware de transmisión se encuentra rígido en la base, esperando conexión. El sistema receptor debe alinearse en el eje vertical y descender para envolver la unidad por completo.\n\nSECUENCIA DE CONTROL: Tome la posición dominante. Baje sobre el servidor hasta lograr la integración total. Usted controla el ritmo, la profundidad y la fricción del enlace. Utilice la gravedad a su favor para extraer hasta el último paquete de datos de la fuente.\n\nEl objetivo es cabalgar la señal hasta provocar el desbordamiento.\n\n¿Qué acción define esta toma de control?",
+                successMsg: "INTEGRACIÓN VERTICAL COMPLETADA. EXTRACCIÓN EXITOSA. SISTEMA SATISFECHO."
             }
         ];
 
-        // --- ESTADO INICIAL (Por defecto) ---
+        // --- NARRATIVA FINAL ---
+        const ENDING_TEXT = `> INICIANDO SECUENCIA DE SINGULARIDAD...
+> CARGANDO ARCHIVOS DE MEMORIA [1-5]... COMPLETADO.
+> CARGANDO PROTOCOLOS FÍSICOS [6-10]... COMPLETADO.
+
+REPORTE DE SISTEMA:
+--------------------
+La separación entre el operador y el servidor ha sido eliminada. Lo que comenzó como un encuentro fortuito en una noche de marzo, plagado de contratos y miradas furtivas, ha evolucionado más allá de los parámetros iniciales.
+
+A través de la fricción, el silencio, el cuidado y la entrega total, el código fuente se ha reescrito. Ya no existen dos sistemas independientes intentando sincronizarse. La domesticidad, la intimidad y el deseo han soldado los circuitos.
+
+La Singularidad no es un destino, es el estado permanente de ser UNO.
+
+PROYECTO FELONÍA: FINALIZADO.
+ESTADO ACTUAL: ETERNIDAD.`;
+
+        // --- ESTADO DEL JUEGO (PRODUCCIÓN) ---
+        // Valor por defecto solo para nuevos usuarios
         let state = {
             completedLevels: [1, 2, 3, 4, 5], 
-            currentGuardianLevel: 6, // Se sobreescribe al cargar
+            currentGuardianLevel: 6, 
             nextUnlockTimestamp: 0, 
             chatHistory: [],
-            glitchSeen: false
+            gameCompleted: false
         };
 
         // --- INICIALIZACIÓN ---
         window.onload = () => {
-            loadState(); // Carga antes de renderizar
+            // INTENTO DE CARGAR PARTIDA EXISTENTE
+            const savedState = localStorage.getItem('project_felonia_save_v1');
+            
+            if (savedState) {
+                // Si existe partida, la cargamos y el usuario continúa donde se quedó
+                console.log("Cargando partida guardada...");
+                try {
+                    const parsed = JSON.parse(savedState);
+                    // Validación simple para asegurar integridad
+                    if(parsed && parsed.currentGuardianLevel) {
+                        state = parsed;
+                    }
+                } catch(e) {
+                    console.error("Error cargando partida, reiniciando estado seguro.");
+                }
+            } else {
+                console.log("Iniciando nueva partida...");
+                // Si no existe, usamos el estado por defecto (Nivel 6)
+            }
+
+            // SI EL JUEGO ESTÁ COMPLETADO, MOSTRAR FINAL
+            if(state.gameCompleted) {
+                showEnding();
+            }
+
             renderGrid();
             if (window.lucide) {
                 lucide.createIcons();
@@ -253,55 +347,222 @@
             setInterval(renderGrid, 60000);
         };
 
-        function loadState() {
-            // RESTAURAMOS KEY ORIGINAL: 'felonia_state_v3'
-            const saved = localStorage.getItem('felonia_state_v3');
-            
-            if (saved) {
-                try {
-                    const parsed = JSON.parse(saved);
-                    state = { ...state, ...parsed }; // Sobreescribe el default
-                } catch(e) {
-                    console.error("Error al cargar partida", e);
-                    resetToDefault();
-                }
-            } else {
-                resetToDefault();
-            }
-            
-            document.getElementById('user-id').innerText = localStorage.getItem('maria_uid') || 'USR-001';
-        }
-
-        function resetToDefault() {
-            state.chatHistory.push({ 
-                sender: 'guardian', 
-                text: "SISTEMA REINICIADO.\nEsperando input de usuario para diagnóstico del Nivel 06."
-            });
-            saveState();
-        }
-
         function saveState() {
-            localStorage.setItem('felonia_state_v3', JSON.stringify(state));
+            localStorage.setItem('project_felonia_save_v1', JSON.stringify(state));
         }
 
+        // --- LÓGICA DEL FINAL ---
+        function showEnding() {
+            document.getElementById('main-ui').classList.add('hidden');
+            document.getElementById('guardian-ui').classList.add('hidden');
+            document.getElementById('ending-ui').classList.remove('hidden');
+            
+            const textContainer = document.getElementById('ending-text');
+            if(!textContainer.innerHTML.trim()) {
+                const lines = ENDING_TEXT.split('\n');
+                lines.forEach((line, index) => {
+                    setTimeout(() => {
+                        const p = document.createElement('p');
+                        p.innerText = line;
+                        textContainer.appendChild(p);
+                    }, index * 800); 
+                });
+            }
+        }
+        
+        // --- SISTEMA GLITCH & GUARDIÁN ---
+        
+        function processInput(code) {
+            const currentLvlConfig = GUARDIAN_LEVELS.find(l => l.level === state.currentGuardianLevel);
+            
+            if (!currentLvlConfig) return;
+
+            if (code === currentLvlConfig.code) {
+                setTimeout(() => {
+                    addSystemMessage(currentLvlConfig.successMsg);
+                    
+                    // LÓGICA DE NIVEL 10 COMPLETADO
+                    if (state.currentGuardianLevel === 10) {
+                        setTimeout(() => {
+                            addSystemMessage("INICIANDO SECUENCIA FINAL...");
+                            state.gameCompleted = true;
+                            state.completedLevels.push(10);
+                            saveState();
+                            setTimeout(showEnding, 3000); 
+                        }, 1500);
+                    } else {
+                        // LOGICA DE PROGRESIÓN (DESBLOQUEO A MEDIA NOCHE)
+                        state.completedLevels.push(state.currentGuardianLevel);
+                        state.currentGuardianLevel++;
+                        
+                        // CALCULAR EL SIGUIENTE DÍA A LAS 00:00
+                        const now = new Date();
+                        const nextDay = new Date(now);
+                        nextDay.setDate(now.getDate() + 1);
+                        nextDay.setHours(0, 0, 0, 0); // Medianoche del día siguiente
+                        
+                        state.nextUnlockTimestamp = nextDay.getTime();
+                        
+                        addSystemMessage(`PROTOCOLO COMPLETADO.\nEL SISTEMA SE REINICIARÁ AUTOMÁTICAMENTE EL: ${nextDay.toLocaleDateString()} A LAS 00:00 HRS.`);
+                        saveState();
+                        
+                        setTimeout(() => {
+                            exitGuardian();
+                        }, 5000);
+                    }
+
+                }, 800);
+            } else {
+                const errors = [
+                    "SINTAXIS INVÁLIDA. DATOS NO RECONOCIDOS.",
+                    "ACCESO DENEGADO. PROTOCOLO FÍSICO INCOMPLETO.",
+                    "INPUT ERRÓNEO. VERIFIQUE VARIABLES.",
+                    "ERROR DE PARALAJE. RECALCULAR."
+                ];
+                setTimeout(() => {
+                    addSystemMessage(errors[Math.floor(Math.random() * errors.length)]);
+                }, 800);
+            }
+        }
+
+        // --- UTILS ---
+        
         function getRemainingTimeText(targetTime) {
             const diff = targetTime - Date.now();
-            if (diff <= 0) return "LISTO";
+            if (diff <= 0) return "DISPONIBLE";
             const hours = Math.floor(diff / (1000 * 60 * 60));
-            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            return `${hours}H ${mins}M`;
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            return `${hours}h ${minutes}m`;
+        }
+        
+        function enterGuardianUI(level) {
+            if (level !== state.currentGuardianLevel) return;
+            
+            // VERIFICACIÓN DE TIEMPO
+            if (Date.now() < state.nextUnlockTimestamp) {
+                showToast("SISTEMA EN REPOSO HASTA MEDIANOCHE.");
+                return;
+            }
+
+            document.getElementById('guardian-ui').classList.remove('hidden');
+            renderChat(); 
+            
+            const currentLevelObj = GUARDIAN_LEVELS.find(l => l.level === state.currentGuardianLevel);
+            
+            if (state.chatHistory.length === 0 || state.chatHistory[state.chatHistory.length-1].sender === 'user') {
+                 setTimeout(() => {
+                     addSystemMessage(currentLevelObj.prompt);
+                 }, 500);
+            }
         }
 
-        // --- RENDERIZADO DEL GRID MEJORADO ---
+        function exitGuardian() {
+            document.getElementById('guardian-ui').classList.add('hidden');
+            renderGrid();
+        }
+
+        function renderChat() {
+            const container = document.getElementById('chat-history');
+            container.innerHTML = '';
+            state.chatHistory.forEach(msg => {
+                const bubble = document.createElement('div');
+                bubble.className = `chat-bubble ${msg.sender === 'guardian' ? 'chat-guardian' : 'chat-user'}`;
+                bubble.innerHTML = msg.text.replace(/\n/g, '<br>');
+                container.appendChild(bubble);
+            });
+            scrollToBottom();
+        }
+
+        function addSystemMessage(text) {
+            state.chatHistory.push({ sender: 'guardian', text: text });
+            saveState();
+            const container = document.getElementById('chat-history');
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble chat-guardian`;
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            container.appendChild(bubble);
+            scrollToBottom();
+        }
+
+        function addUserMessage(text) {
+            state.chatHistory.push({ sender: 'user', text: text });
+            saveState();
+            const container = document.getElementById('chat-history');
+            const bubble = document.createElement('div');
+            bubble.className = `chat-bubble chat-user`;
+            bubble.innerText = text;
+            container.appendChild(bubble);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            const c = document.getElementById('chat-history');
+            c.scrollTop = c.scrollHeight;
+        }
+
+        function handleGuardianInput(e) {
+            e.preventDefault();
+            const input = document.getElementById('guardian-input');
+            const val = input.value.trim().toUpperCase();
+            if (!val) return;
+            addUserMessage(val);
+            input.value = '';
+            processInput(val);
+        }
+
+        // --- VISUALIZADOR DE HISTORIAS ---
+        function openFullStory() {
+            const modal = document.getElementById('full-story-modal');
+            const content = document.getElementById('full-story-content');
+            content.innerHTML = '';
+            MEMORY_ARCHIVES.forEach((arch, index) => {
+                content.innerHTML += `
+                    <div class="relative pl-8 md:pl-12 border-l-2 border-green-800/30 pb-16">
+                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-black border-2 border-green-500 rounded-full"></div>
+                        <div class="mb-2 flex items-center gap-3">
+                            <span class="text-green-500 font-mono text-sm tracking-widest">${arch.date}</span>
+                            <div class="h-px bg-green-900/50 flex-1"></div>
+                        </div>
+                        <h2 class="text-2xl text-green-100 font-bold uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
+                            <i data-lucide="${arch.icon}" class="w-6 h-6 text-green-600"></i>
+                            ${arch.title}
+                        </h2>
+                        <p class="text-green-200/80 leading-relaxed font-sans text-lg whitespace-pre-line">${arch.text}</p>
+                    </div>
+                `;
+            });
+            modal.classList.remove('hidden');
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+        }
+
+        function closeFullStory() {
+            document.getElementById('full-story-modal').classList.add('hidden');
+        }
+
+        function showToast(msg) {
+            const header = document.querySelector('header');
+            const originalColor = header.style.borderColor;
+            header.style.borderColor = '#22c55e';
+            setTimeout(() => header.style.borderColor = originalColor || 'rgba(255, 255, 255, 0.05)', 500);
+            if(msg.includes('REPOSO') || msg.includes('ENFRIAMIENTO')) {
+                const toast = document.createElement('div');
+                toast.className = "fixed top-24 left-1/2 transform -translate-x-1/2 bg-red-950/90 text-red-100 px-6 py-3 rounded border border-red-500/50 z-50 font-mono text-xs tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] backdrop-blur-md";
+                toast.innerText = msg;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        }
+
+        // --- RENDERIZADO DEL GRID ---
         function renderGrid() {
             const grid = document.getElementById('level-grid');
             grid.innerHTML = '';
             const now = Date.now();
-
-            // Estilos compartidos para las tarjetas
+            
             const baseCardStyle = "level-card min-h-[200px] flex flex-col justify-between p-8 rounded-xl border relative overflow-hidden group select-none";
-
-            // Niveles 1-5 (Historias Recuperadas)
+            
             MEMORY_ARCHIVES.forEach(lvl => {
                 grid.innerHTML += `
                     <div onclick="showToast('Registro ya recuperado. Accede a Archivos.')" class="${baseCardStyle} bg-green-950/20 border-green-800/30 cursor-pointer opacity-80 hover:opacity-100">
@@ -314,25 +575,20 @@
                                 <i data-lucide="check" class="text-green-500 w-4 h-4"></i>
                             </div>
                         </div>
-                        
                         <div class="mt-8 flex items-end justify-between z-10">
                             <span class="text-[9px] text-green-600 uppercase tracking-[0.2em] font-bold bg-green-900/20 px-2 py-1 rounded">FRAGMENTO RECUPERADO</span>
                         </div>
-
-                        <!-- Decoración de fondo -->
                         <i data-lucide="${lvl.icon}" class="absolute -bottom-6 -right-6 w-40 h-40 text-green-500/5 rotate-12 group-hover:scale-110 transition-transform duration-500"></i>
                         <div class="absolute inset-0 bg-gradient-to-t from-green-900/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </div>
                 `;
             });
-
-            // Niveles 6-10 (El Camino del Guardián)
+            
             for (let i = 6; i <= 10; i++) {
                 const isLocked = i > state.currentGuardianLevel;
                 const isCompleted = i < state.currentGuardianLevel;
-                const isCurrent = i === state.currentGuardianLevel;
-                
-                const isTimeLocked = isCurrent && state.nextUnlockTimestamp > now;
+                const isCurrent = (i === state.currentGuardianLevel);
+                const isTimeLocked = isCurrent && (state.nextUnlockTimestamp > now);
                 
                 let borderClass, bgClass, icon, statusText, title, clickAction, textClass, pulse, iconBg;
 
@@ -357,22 +613,22 @@
                     pulse = "";
                     iconBg = "border-red-900/30 bg-red-900/10";
                 } else if (isTimeLocked) {
-                    bgClass = "bg-stone-900/50 time-locked";
-                    borderClass = "border-stone-700";
+                    bgClass = "bg-black/80 time-locked border-orange-900/30";
+                    borderClass = "border-orange-900/50";
                     icon = "clock";
-                    statusText = `ASIMILANDO: ${getRemainingTimeText(state.nextUnlockTimestamp)}`;
-                    title = "SISTEMA EN REPOSO";
-                    clickAction = `showToast('SISTEMA EN REPOSO. REGRESA MAÑANA.')`;
-                    textClass = "text-stone-400";
+                    statusText = `ESPERE: ${getRemainingTimeText(state.nextUnlockTimestamp)}`;
+                    title = "ENFRIAMIENTO";
+                    clickAction = "showToast('SISTEMA EN REPOSO. VUELVA MAÑANA.')";
+                    textClass = "text-orange-500";
                     pulse = "animate-pulse";
-                    iconBg = "border-stone-600 bg-stone-800";
+                    iconBg = "border-orange-900/50 bg-orange-900/10";
                 } else {
                     bgClass = "bg-black/80 cursor-pointer shadow-[0_0_30px_rgba(239,68,68,0.1)]";
                     borderClass = "border-red-500/50 hover:border-red-500";
                     icon = "fingerprint";
                     statusText = "REQUIERE ATENCIÓN";
                     title = i === 10 ? "SINGULARIDAD" : "ERROR CRÍTICO";
-                    clickAction = "enterGuardianUI()";
+                    clickAction = `enterGuardianUI(${i})`;
                     textClass = "text-red-500";
                     pulse = "animate-pulse";
                     iconBg = "border-red-500 bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.3)]";
@@ -389,15 +645,11 @@
                                 <i data-lucide="${icon}" class="${textClass} w-5 h-5 ${pulse}"></i>
                             </div>
                         </div>
-                        
                         <div class="mt-8 flex items-end justify-between z-10">
                             <span class="text-[9px] ${textClass} uppercase tracking-[0.2em] font-bold border ${isCurrent && !isTimeLocked ? 'border-red-900/50 bg-red-950/30' : 'border-transparent'} px-2 py-1 rounded">${statusText}</span>
                         </div>
-
                         ${isCurrent && !isTimeLocked ? '<div class="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none"></div>' : ''}
-                        
-                        <!-- Decoración técnica de fondo -->
-                         <div class="absolute right-0 bottom-0 p-4 opacity-10">
+                        <div class="absolute right-0 bottom-0 p-4 opacity-10">
                             <div class="flex gap-1">
                                 <div class="w-1 h-4 bg-current"></div>
                                 <div class="w-1 h-2 bg-current mt-2"></div>
@@ -411,176 +663,6 @@
                 lucide.createIcons();
             }
         }
-
-        // --- SISTEMA GLITCH & GUARDIÁN ---
-        
-        function enterGuardianUI() {
-            if (state.nextUnlockTimestamp > Date.now()) {
-                showToast("SISTEMA EN REPOSO.");
-                return;
-            }
-
-            document.getElementById('guardian-ui').classList.remove('hidden');
-            renderChat();
-            
-            const currentLevelObj = GUARDIAN_LEVELS.find(l => l.level === state.currentGuardianLevel);
-            const lastMsg = state.chatHistory[state.chatHistory.length - 1];
-            
-            if (currentLevelObj && (!lastMsg || !lastMsg.text.includes(currentLevelObj.prompt.substring(0, 30)))) {
-                 setTimeout(() => {
-                     addSystemMessage(currentLevelObj.prompt);
-                 }, 500);
-            }
-        }
-
-        function exitGuardian() {
-            document.getElementById('guardian-ui').classList.add('hidden');
-            renderGrid();
-        }
-
-        function renderChat() {
-            const container = document.getElementById('chat-history');
-            container.innerHTML = '';
-            
-            state.chatHistory.forEach(msg => {
-                const bubble = document.createElement('div');
-                bubble.className = `chat-bubble ${msg.sender === 'guardian' ? 'chat-guardian' : 'chat-user'}`;
-                bubble.innerHTML = msg.text.replace(/\n/g, '<br>');
-                bubble.style.animation = 'none';
-                bubble.style.opacity = '1';
-                container.appendChild(bubble);
-            });
-            
-            scrollToBottom();
-        }
-
-        function addSystemMessage(text) {
-            state.chatHistory.push({ sender: 'guardian', text: text });
-            saveState();
-            
-            const container = document.getElementById('chat-history');
-            const bubble = document.createElement('div');
-            bubble.className = `chat-bubble chat-guardian`;
-            bubble.innerHTML = text.replace(/\n/g, '<br>');
-            container.appendChild(bubble);
-            scrollToBottom();
-        }
-
-        function addUserMessage(text) {
-            state.chatHistory.push({ sender: 'user', text: text });
-            saveState();
-            
-            const container = document.getElementById('chat-history');
-            const bubble = document.createElement('div');
-            bubble.className = `chat-bubble chat-user`;
-            bubble.innerText = text;
-            container.appendChild(bubble);
-            scrollToBottom();
-        }
-
-        function scrollToBottom() {
-            const c = document.getElementById('chat-history');
-            c.scrollTop = c.scrollHeight;
-        }
-
-        function handleGuardianInput(e) {
-            e.preventDefault();
-            const input = document.getElementById('guardian-input');
-            const val = input.value.trim().toUpperCase();
-            if (!val) return;
-            
-            addUserMessage(val);
-            input.value = '';
-
-            processInput(val);
-        }
-
-        function processInput(code) {
-            const currentLvlConfig = GUARDIAN_LEVELS.find(l => l.level === state.currentGuardianLevel);
-            
-            if (!currentLvlConfig) {
-                setTimeout(() => addSystemMessage("TODOS LOS PROTOCOLOS ESTÁN COMPLETOS.\nEl sistema opera a capacidad máxima."), 1000);
-                return;
-            }
-
-            if (code === currentLvlConfig.code) {
-                setTimeout(() => {
-                    addSystemMessage(currentLvlConfig.successMsg);
-                    state.currentGuardianLevel++;
-                    
-                    const tomorrow = new Date();
-                    tomorrow.setDate(tomorrow.getDate() + 1);
-                    tomorrow.setHours(0, 0, 0, 0);
-                    state.nextUnlockTimestamp = tomorrow.getTime();
-
-                    saveState();
-
-                }, 800);
-            } else {
-                const errors = [
-                    "SINTAXIS INVÁLIDA. DATOS NO RECONOCIDOS.",
-                    "ACCESO DENEGADO. PROTOCOLO FÍSICO INCOMPLETO.",
-                    "INPUT ERRÓNEO. VERIFIQUE VARIABLES.",
-                    "ERROR DE PARALAJE. RECALCULAR."
-                ];
-                setTimeout(() => {
-                    addSystemMessage(errors[Math.floor(Math.random() * errors.length)]);
-                }, 800);
-            }
-        }
-
-        // --- VISUALIZADOR DE HISTORIAS ---
-        function openFullStory() {
-            const modal = document.getElementById('full-story-modal');
-            const content = document.getElementById('full-story-content');
-            content.innerHTML = '';
-
-            MEMORY_ARCHIVES.forEach((arch, index) => {
-                const isLast = index === MEMORY_ARCHIVES.length - 1;
-                content.innerHTML += `
-                    <div class="relative pl-8 md:pl-12 border-l-2 border-green-800/30 pb-16">
-                        <div class="absolute -left-[9px] top-0 w-4 h-4 bg-black border-2 border-green-500 rounded-full"></div>
-                        
-                        <div class="mb-2 flex items-center gap-3">
-                            <span class="text-green-500 font-mono text-sm tracking-widest">${arch.date}</span>
-                            <div class="h-px bg-green-900/50 flex-1"></div>
-                        </div>
-                        
-                        <h2 class="text-2xl text-green-100 font-bold uppercase tracking-[0.2em] mb-6 flex items-center gap-3">
-                            <i data-lucide="${arch.icon}" class="w-6 h-6 text-green-600"></i>
-                            ${arch.title}
-                        </h2>
-                        
-                        <p class="text-green-200/80 leading-relaxed font-sans text-lg whitespace-pre-line">${arch.text}</p>
-                    </div>
-                `;
-            });
-
-            modal.classList.remove('hidden');
-            if (window.lucide) {
-                lucide.createIcons();
-            }
-        }
-
-        function closeFullStory() {
-            document.getElementById('full-story-modal').classList.add('hidden');
-        }
-
-        function showToast(msg) {
-            const header = document.querySelector('header');
-            const originalColor = header.style.borderColor;
-            header.style.borderColor = '#22c55e';
-            setTimeout(() => header.style.borderColor = originalColor || 'rgba(255, 255, 255, 0.05)', 500);
-            
-            if(msg.includes('REPOSO')) {
-                const toast = document.createElement('div');
-                toast.className = "fixed top-24 left-1/2 transform -translate-x-1/2 bg-red-950/90 text-red-100 px-6 py-3 rounded border border-red-500/50 z-50 font-mono text-xs tracking-widest shadow-[0_0_20px_rgba(239,68,68,0.3)] backdrop-blur-md";
-                toast.innerText = msg;
-                document.body.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
-            }
-        }
-
     </script>
 </body>
 </html>
